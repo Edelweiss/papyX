@@ -1,7 +1,7 @@
 # papyX
 xslt scrips and xqueries
 
-## setup
+## ⚙ setup
 
 ```
 git clone git@github.com:Edelweiss/papyX.git
