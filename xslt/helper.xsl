@@ -14,7 +14,7 @@
 <xsl:variable name="apo" select="'&#x22;'"/>
 <xsl:variable name="gt" select="'&#x3e;'"/>
 <xsl:variable name="lt" select="'&#x3c;'"/>
-<xsl:variable name="IDNOS" select="document('data/IDNOS.xml')"/>
+<xsl:variable name="IDNOS" select="document('../data/IDNOS.xml')"/>
 
 <xsl:template name="papy:csvLine">
     <xsl:param name="data"/>
