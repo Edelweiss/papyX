@@ -1,13 +1,24 @@
 # papyX
 xslt scrips and xqueries
 
-## helper
+## setup
+
+```
+git clone git@github.com:Edelweiss/papyX.git
+cd papyX/
+ln -s ~/path/to/idp.data
+mkdir data
+```
+
+## scripts
+
+### helper
 
 ```
 <xsl:include href="helper.xsl" />
 ```
 
-### hgv and dclp file names
+#### hgv and dclp file names
 
 ```
 papy:folder1000(TM or HGV)
@@ -15,7 +26,7 @@ papy:dclpFilePath(TM number)
 papy:hgvFilePath(HGV id)
 ```
 
-### idp.data idnos
+#### idp.data idnos
 
 ```
 <xsl:template name="GET_IDNOS">
@@ -26,7 +37,7 @@ papy:hgvFilePath(HGV id)
 </xsl:template>
 ```
 
-### identity transformation
+#### identity transformation
 
 ```
 <xsl:result-document href="../data/out.xml" method="xml" media-type="text/xml" indent="yes">
@@ -34,7 +45,7 @@ papy:hgvFilePath(HGV id)
 </xsl:result-document>
 ```
 
-### csv
+#### csv
 
 ```
 <xsl:call-template name="papy:csvLine">
@@ -42,13 +53,13 @@ papy:hgvFilePath(HGV id)
 </xsl:call-template>
 ```
 
-### range
+#### range
 
 ```
 papy:range($from, $to)
 ```
 
-## update images
+### update images
 
 | Parameter         | Description | Example  |
 | ----------------- |:-------------:| -----:|
