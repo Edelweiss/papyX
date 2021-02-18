@@ -12,7 +12,7 @@ mkdir data
 
 ## scripts
 
-### helper
+### 📜 helper
 
 ```
 <xsl:include href="helper.xsl" />
@@ -59,7 +59,7 @@ papy:hgvFilePath(HGV id)
 papy:range($from, $to)
 ```
 
-### update images
+### 📜 update images
 
 | Parameter         | Description | Example  |
 | ----------------- |:-------------:| -----:|
