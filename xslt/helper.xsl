@@ -48,6 +48,12 @@
                   </xsl:for-each>
               </xsl:for-each>
           </xsl:for-each>
+          <xsl:for-each select="collection(concat($idp.data, '/DCLP?select=*.xml;recurse=yes'))">
+            <xsl:variable name="dclp" select="string(.//tei:idno[@type='dclp-hybrid'][1])"/>
+            <xsl:variable name="tm" select="string(.//tei:idno[@type='TM'])"/>
+            <xsl:message select="concat('____', $dclp, ' / ', $tm)"/>
+            <item dclp="{$dclp}" tm="{$tm}"/>
+          </xsl:for-each>
         </list>
     </xsl:template>
 

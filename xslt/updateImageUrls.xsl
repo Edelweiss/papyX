@@ -28,6 +28,13 @@
     <xsl:param name="KILL_URL" select="'ALL_FIGURE_GRAPHIC_URLS_CONTAINING_THIS_STRING_WILL_BE_DROPPED_DURING_ID_TRANSFORMATION'"/>
     <xsl:variable name="IMAGE_URLS" select="doc($DATA_FILE)"/>
 
+    <xsl:template name="UPDATE_IDNOS">
+        <xsl:call-template name="IDNOS">
+            <xsl:with-param name="idp.data" select="$IDP-DATA_READ"/>
+            <xsl:with-param name="reference" select="'HGV'"/>
+        </xsl:call-template>
+    </xsl:template>
+
     <xsl:template name="UPDATE_IMAGES">
 
         <xsl:for-each-group select="$IMAGE_URLS//table:table[@table:name=$TABLE]/table:table-row[position() &gt; $HEADER][matches(normalize-space(table:table-cell[$ID_COLUMN]), '^\d+[^a-z]*$')]" group-by="normalize-space(table:table-cell[$ID_COLUMN])">
