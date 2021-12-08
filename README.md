@@ -78,5 +78,5 @@ java -Xms1024m -Xmx2536m net.sf.saxon.Transform -o:../data/updateImageUrls.csv -
 
 java -Xms1024m -Xmx2536m net.sf.saxon.Transform -o:../data/updateImageUrls.csv -it:UPDATE_IMAGES -xsl:updateImageUrls.xsl DATA_FILE=../data/newBritishLibraryLinks.fods KILL_URL=bl.uk/manuscripts/FullDisplay TABLE=listFromMicucci ID_COLUMN=3 URL_COLUMN=5 IDENTIFIER=TM HEADER=2
 
-java -Xms1024m -Xmx2536m net.sf.saxon.Transform -o:data/IDNOS.xml -it:UPDATE_IDNOS -xsl:xslt/updateImageUrls.xsl
+java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/IDNOS.xml -it:GET_IDNOS -xsl:xslt/008_getIdnos.xsl
 ```
