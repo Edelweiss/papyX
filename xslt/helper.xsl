@@ -9,25 +9,16 @@
     xmlns:tei="http://www.tei-c.org/ns/1.0"
     xmlns:fn="http://www.xsltfunctions.com/"
     xmlns:functx="http://www.functx.com"
+    xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"
     xmlns="http://www.tei-c.org/ns/1.0">
 
-<xsl:variable name="apo" select="'&#x22;'"/>
-<xsl:variable name="gt" select="'&#x3e;'"/>
-<xsl:variable name="lt" select="'&#x3c;'"/>
-<xsl:variable name="IDNOS" select="document('../data/IDNOS.xml')"/>
+  <xsl:variable name="apo" select="'&#x22;'"/>
+  <xsl:variable name="gt" select="'&#x3e;'"/>
+  <xsl:variable name="lt" select="'&#x3c;'"/>
 
-<xsl:template name="papy:csvLine">
-    <xsl:param name="data"/>
-      <xsl:for-each select="$data">
-        <xsl:value-of select="$apo"/><xsl:value-of select="papy:makeCsvSafe(.)"/><xsl:value-of select="$apo"/><xsl:text>,</xsl:text>
-      </xsl:for-each><xsl:text>
-</xsl:text>
-    </xsl:template>
+<!-- IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS -->
 
-    <xsl:function name="papy:makeCsvSafe">
-      <xsl:param name="in"/>
-      <xsl:value-of select="replace($in, $apo, concat($apo, $apo))"/>
-    </xsl:function>
+  <xsl:variable name="IDNOS" select="document('../data/IDNOS.xml')"/>
 
   <xsl:template name="IDNOS">
     <xsl:param name="idp.data"/>
@@ -57,48 +48,149 @@
         </list>
     </xsl:template>
 
-    <xsl:function name="papy:folder1000">
-      <xsl:param name="tmlike"/>
-      <xsl:value-of select="ceiling(number(replace($tmlike, '[^\d]', '')) div 1000)"/>
-    </xsl:function>
+<!-- CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV -->
 
-    <xsl:function name="papy:dclpFilePath">
-      <xsl:param name="tm"/>
-      <xsl:value-of select="concat('DCLP/', papy:folder1000($tm), '/', normalize-space($tm), '.xml')"/>
-    </xsl:function>
-
-    <xsl:function name="papy:hgvFilePath">
-      <xsl:param name="hgv"/>
-      <xsl:value-of select="concat('HGV_meta_EpiDoc/HGV', papy:folder1000($hgv), '/', normalize-space($hgv), '.xml')"/>
-    </xsl:function>
-
-    <xsl:function name="papy:range">
-      <xsl:param name="from" as="xs:integer"/>
-      <xsl:param name="to" as="xs:integer"/>
-      <xsl:if test="$to &gt;= $from">
-        <xsl:copy-of select="papy:rangeR($from, $to)"/>
-      </xsl:if>
-    </xsl:function>
-
-    <xsl:function name="papy:rangeR">
-      <xsl:param name="from" as="xs:integer"/>
-      <xsl:param name="to" as="xs:integer"/>
-      <xsl:choose>
-        <xsl:when test="$from &lt; $to">
-          <xsl:copy-of select="($from, papy:rangeR($from + 1, $to))"/>
-        </xsl:when>
-        <xsl:when test="$from = $to">
-          <xsl:copy-of select="$from"/>
-        </xsl:when>
-      </xsl:choose>
-    </xsl:function>
-    
-    <xsl:template match="@*|node()" mode="copy">
+  <xsl:template name="papy:csvLine">
       <xsl:param name="data"/>
-      <xsl:copy>
-        <xsl:apply-templates select="@*|node()" mode="copy">
-          <xsl:with-param name="data" select="$data"/>
-        </xsl:apply-templates>
-      </xsl:copy>
-    </xsl:template>
+        <xsl:for-each select="$data">
+          <xsl:value-of select="$apo"/><xsl:value-of select="papy:makeCsvSafe(.)"/><xsl:value-of select="$apo"/><xsl:text>,</xsl:text>
+        </xsl:for-each><xsl:text>
+</xsl:text>
+  </xsl:template>
+
+  <xsl:function name="papy:makeCsvSafe">
+    <xsl:param name="in"/>
+    <xsl:value-of select="replace($in, $apo, concat($apo, $apo))"/>
+  </xsl:function>
+
+  <!-- FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS -->
+
+  <xsl:template name="papy:fodsIndex">
+      <xsl:param name="fodsTable" as="node()"/>
+      <xsl:param name="headerLine" as="xs:integer" select="0"/>
+      <xsl:param name="headerKey" as="xs:string"/>
+      <xsl:variable name="header" as="xs:integer">
+        <xsl:choose>
+          <xsl:when test="$headerLine">
+            <xsl:value-of select="$headerLine"/>
+          </xsl:when>
+          <xsl:when test="string($headerKey)">
+            <xsl:value-of select="count($fodsTable//table:table-cell[normalize-space(.) = $headerKey]/ancestor::table:table-row/preceding-sibling::table:table-row) + 1"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="1"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+
+      <list>
+          <xsl:for-each select="$fodsTable//table:table-row[$header]/table:table-cell">
+              <xsl:if test="string(.)">
+                  <item column="{position() + sum(preceding-sibling::table:table-cell/@table:number-columns-repeated) - count(preceding-sibling::table:table-cell[number(@table:number-columns-repeated) &gt; 1])}" name="{normalize-space(.)}"/>
+              </xsl:if>
+          </xsl:for-each>
+      </list>
+  </xsl:template>
+
+  <xsl:template name="papy:fodsIndexData">
+      <xsl:param name="fodsDocument" as="node()"/>
+      <xsl:param name="tableName" as="xs:string"/>
+      <xsl:param name="dataLine" as="xs:integer"/>
+      <xsl:param name="headerLine" as="xs:integer" select="0"/>
+      <xsl:param name="headerKey" as="xs:string"/>
+
+      <xsl:message select="concat('TABLE: ', $tableName, '; DATA: ', $dataLine, '; HEADER: ', $headerLine, ' (', $headerKey, ')')"/>
+      <xsl:message select="'________________________________'"/>
+
+      <xsl:variable name="fodsTable" select="$fodsDocument//table:table[@table:name=$tableName]"/>
+
+      <xsl:variable name="index">
+        <xsl:call-template name="papy:fodsIndex">
+            <xsl:with-param name="fodsTable" select="$fodsTable"/>
+            <xsl:with-param name="headerLine" select="$headerLine"/>
+            <xsl:with-param name="headerKey" select="$headerKey"/>
+        </xsl:call-template>
+      </xsl:variable>
+
+      <xsl:for-each select="$index//tei:item">
+          <xsl:message select="concat(@column, '&#09;', @name)"/>
+      </xsl:for-each>
+      <xsl:message select="'________________________________'"/>
+
+      <fods>
+        <index>
+          <xsl:copy-of select="$index"/>
+        </index>
+      <table>
+          <xsl:for-each select="$fodsTable/table:table-row[position() &gt;= $dataLine]">
+              <row>
+                  <xsl:for-each select="table:table-cell">
+                      <xsl:variable name="summedUpPosition" select="position() + sum(preceding-sibling::table:table-cell/@table:number-columns-repeated) - count(preceding-sibling::table:table-cell[number(@table:number-columns-repeated) &gt; 1])"/>
+                      <xsl:variable name="value" select="normalize-space(.)"/>
+                      <cell name="{$index//tei:item[@column = $summedUpPosition]/@name}">
+                          <xsl:value-of select="$value"/>
+                      </cell>
+                      <xsl:if test="number(@table:number-columns-repeated) &gt; 1">
+                          <xsl:for-each select="papy:range(2, @table:number-columns-repeated)">
+                              <xsl:variable name="subsequent" select="position()"/>
+                              <cell name="{$index//tei:item[@column = $summedUpPosition + $subsequent]/@name}">
+                                  <xsl:value-of select="$value"/>
+                              </cell>
+                          </xsl:for-each>
+                      </xsl:if>
+                  </xsl:for-each>
+              </row>
+          </xsl:for-each>
+      </table>
+      </fods>
+  </xsl:template>
+
+  <!-- HGV etc. HGV etc. HGV etc. HGV etc. HGV etc. HGV etc. HGV etc. HGV etc.-->
+
+  <xsl:function name="papy:folder1000">
+    <xsl:param name="tmlike"/>
+    <xsl:value-of select="ceiling(number(replace($tmlike, '[^\d]', '')) div 1000)"/>
+  </xsl:function>
+
+  <xsl:function name="papy:dclpFilePath">
+    <xsl:param name="tm"/>
+    <xsl:value-of select="concat('DCLP/', papy:folder1000($tm), '/', normalize-space($tm), '.xml')"/>
+  </xsl:function>
+
+  <xsl:function name="papy:hgvFilePath">
+    <xsl:param name="hgv"/>
+    <xsl:value-of select="concat('HGV_meta_EpiDoc/HGV', papy:folder1000($hgv), '/', normalize-space($hgv), '.xml')"/>
+  </xsl:function>
+
+  <!-- A L L G E M E I N -->
+
+  <xsl:function name="papy:range">
+    <xsl:param name="from" as="xs:integer"/>
+    <xsl:param name="to" as="xs:integer"/>
+    <xsl:if test="$to &gt;= $from">
+      <xsl:copy-of select="papy:rangeR($from, $to)"/>
+    </xsl:if>
+  </xsl:function>
+
+  <xsl:function name="papy:rangeR">
+    <xsl:param name="from" as="xs:integer"/>
+    <xsl:param name="to" as="xs:integer"/>
+    <xsl:choose>
+      <xsl:when test="$from &lt; $to">
+        <xsl:copy-of select="($from, papy:rangeR($from + 1, $to))"/>
+      </xsl:when>
+      <xsl:when test="$from = $to">
+        <xsl:copy-of select="$from"/>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:function>
+
+  <xsl:template match="@*|node()" mode="copy">
+    <xsl:param name="data"/>
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="copy">
+        <xsl:with-param name="data" select="$data"/>
+      </xsl:apply-templates>
+    </xsl:copy>
+  </xsl:template>
 </xsl:stylesheet>
