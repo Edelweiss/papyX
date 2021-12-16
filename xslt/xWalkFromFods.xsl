@@ -10,15 +10,13 @@
     xmlns:fn="http://www.xsltfunctions.com/"
     xmlns:functx="http://www.functx.com"
     xmlns="http://www.tei-c.org/ns/1.0"
-
     xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0">
-
-    <!--
+  <!--
     update idnos
         java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/IDNOS.xml -it:GET_IDNOS -xsl:xslt/getIdnos.xsl
 
     xwalk
-        java -Xms512m -Xmx1536m net.sf.saxon.Transform -s:data/louvreImages.fods -o:data/louvreImages.xml -it:ADD_IMAGES -xsl:xslt/xWalkFromFods.xsl
+        java -Xms512m -Xmx1536m net.sf.saxon.Transform -s:data/oKrok_Claud_Images.fods -o:data/louvreImages.xml -it:ADD_IMAGES -xsl:xslt/xWalkFromFods.xsl
 
     Lookup-Formel für Goolge Sheets
         =ARRAYFORMULA(IFNA(VLOOKUP(B2:B,xWalk!$A$1:$A,1,false),""))
@@ -27,11 +25,28 @@
   <xsl:output method="xml" media-type="text/xml" />
   <xsl:include href="helper.xsl" />
 
-  <xsl:param name="TABLE_NAME" select="'links_TM_nos'"/>
+  <xsl:param name="TABLE_NAME" select="'4berangere'"/>
   <xsl:param name="IMAGE_KEY" select="'Louvre image link'"/>
-  <xsl:param name="HEADER_KEY" select="'TM_no3'"/>
+  <xsl:param name="HEADER_KEY" select="'Trismegistos'"/>
   <xsl:param name="HEADER_LINE" select="1"/>
   <xsl:param name="DATA_LINE" select="2"/>
+
+  <xsl:template name="ADD_COLLECTION">
+    <xsl:variable name="fods">
+      <xsl:call-template name="papy:fodsIndexData">
+        <xsl:with-param name="fodsDocument" select="."/>
+        <xsl:with-param name="tableName" select="$TABLE_NAME"/>
+        <xsl:with-param name="dataLine" select="$DATA_LINE"/>
+        <xsl:with-param name="headerKey" select="$HEADER_KEY"/>
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:for-each-group select="$fods//tei:row[matches(tei:cell[@name=$HEADER_KEY], '^\d+$')]" group-by="tei:cell[@name=$HEADER_KEY]">
+      <xsl:call-template name="xwalk">
+        <xsl:with-param name="id" select="current-grouping-key()"/>
+        <xsl:with-param name="data" select="current-group()"/>
+      </xsl:call-template>
+    </xsl:for-each-group>
+  </xsl:template>
 
   <xsl:template name="ADD_IMAGES">
     <xsl:variable name="fods">
@@ -76,7 +91,7 @@
           <xsl:with-param name="data" select="$data"/>
         </xsl:apply-templates>
       </xsl:result-document>
-      <xsl:message select="concat('_____ ', $tm, '/', .)"/>
+      <xsl:message select="concat('_____ ', $id, '/', .)"/>
     </xsl:for-each>
   </xsl:template>
 
@@ -137,9 +152,34 @@
     </xsl:for-each>
   </xsl:template>
 
+  <!--msIdentifier>
+    <placeName>
+      <settlement>Dublin</settlement>
+    </placeName>
+    <collection>Trinity College</collection>
+    <idno type="invNo">Pap. Select Box 201</idno>
+  </msIdentifier-->
+
+  <!--xsl:template match="tei:msIdentifier" mode="copy">
+    <xsl:param name="data"/>
+    <xsl:copy>
+      <xsl:for-each select="$data//tei:cell[@name='Inventory Nr']">
+        <xsl:variable name="settlement" select="'Qift'"/>
+        <xsl:variable name="collection" select="'Archaeological storeroom'"/>
+        <xsl:variable name="inventoryNumber" select="normalize-space(replace(., 'Qift,? ?Archaeological storeroom,? ?', ''))"/>
+        <xsl:message select="$inventoryNumber"/>
+        <placeName>
+          <settlement><xsl:value-of select="$settlement"/></settlement>
+        </placeName>
+        <collection><xsl:value-of select="$collection"/></collection>
+        <idno type="invNo"><xsl:value-of select="$inventoryNumber"/></idno>
+      </xsl:for-each>
+    </xsl:copy>
+  </xsl:template-->
+
   <!-- DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP -->
 
-   <!--div type="bibliography" subtype="illustrations">
+  <!--div type="bibliography" subtype="illustrations">
       <listBibl>
          <bibl type="printed">P.Gen. 3, pl.5</bibl>
          <bibl type="printed">Proceedings 20th Congress, pl.28</bibl>
@@ -153,17 +193,17 @@
    </div-->
 
   <xsl:template match="tei:body[not(tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl)]" mode="copy_dclp">
-      <xsl:param name="data"/>
-      <xsl:copy>
-        <xsl:apply-templates select="@*|node()" mode="copy_dclp"/>
-        <div type="bibliography" subtype="illustrations">
-          <listBibl>
-           <xsl:call-template name="dclpImage">
-             <xsl:with-param name="data" select="$data"/>
-           </xsl:call-template>
-          </listBibl>
-        </div>
-      </xsl:copy>
+    <xsl:param name="data"/>
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="copy_dclp"/>
+      <div type="bibliography" subtype="illustrations">
+        <listBibl>
+          <xsl:call-template name="dclpImage">
+            <xsl:with-param name="data" select="$data"/>
+          </xsl:call-template>
+        </listBibl>
+      </div>
+    </xsl:copy>
   </xsl:template>
 
   <xsl:template match="tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl" mode="copy_dclp">
@@ -189,9 +229,9 @@
       <xsl:variable name="row" select="."/>
       <xsl:variable name="firstLink" select="$row//tei:cell[@name=$IMAGE_KEY]"/>
       <xsl:for-each select="($firstLink, $firstLink/following-sibling::tei:cell[matches(., '^https?://.+\..+$')])">
-       <bibl type="online">
-           <ptr target="{.}"/>
-       </bibl>
+        <bibl type="online">
+          <ptr target="{.}"/>
+        </bibl>
       </xsl:for-each>
     </xsl:for-each>
   </xsl:template>
