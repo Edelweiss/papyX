@@ -44,37 +44,40 @@
       </xsl:call-template>
     </xsl:variable>
     <xsl:for-each-group select="$fods//tei:row[matches(tei:cell[@name=$HEADER_KEY], '^\d+$')]" group-by="tei:cell[@name=$HEADER_KEY]">
-      <xsl:variable name="tm" select="current-grouping-key()"/>
-      <xsl:variable name="data" select="current-group()"/>
-
-      <!--xsl:variable name="imageUrl" select="string(tei:cell[@name=$IMAGE_KEY])"/-->
-
-        <xsl:variable name="hgv" select="$IDNOS//tei:item[@tm=$tm][@hgv]/@hgv"/>
-        <xsl:variable name="dclp" select="$IDNOS//tei:item[@tm=$tm][@dclp]/@dclp"/>
-
-        <xsl:for-each select="$hgv">
-          <xsl:variable name="in" select="concat('../idp.data/papyri/master/', papy:hgvFilePath(.))"/>
-          <xsl:variable name="out" select="replace($in, 'master', 'xwalk')"/>
-          <xsl:result-document href="{$out}" method="xml" media-type="text/xml" indent="yes">
-            <xsl:apply-templates select="doc($in)" mode="copy">
-              <xsl:with-param name="data" select="$data"/>
-            </xsl:apply-templates>
-          </xsl:result-document>
-          <xsl:message select="concat('_____ ', $tm, '/', .)"/>
-        </xsl:for-each>
-
-        <!--xsl:for-each select="$dclp">
-          <xsl:variable name="in" select="concat('../idp.data/papyri/master/', papy:dclpFilePath($tm))"/>
-          <xsl:variable name="out" select="replace($in, 'master', 'xwalk')"/>
-          <xsl:result-document href="{$out}" method="xml" media-type="text/xml" indent="yes">
-            <xsl:apply-templates select="doc($in)" mode="copy_dclp">
-              <xsl:with-param name="data" select="$data"/>
-            </xsl:apply-templates>
-          </xsl:result-document>
-          <xsl:message select="concat('_____ ', $tm, '/', .)"/>
-        </xsl:for-each-->
-
+      <xsl:call-template name="xwalk">
+        <xsl:with-param name="id" select="current-grouping-key()"/>
+        <xsl:with-param name="data" select="current-group()"/>
+      </xsl:call-template>
     </xsl:for-each-group>
+  </xsl:template>
+
+  <xsl:template name="xwalk">
+    <xsl:param name="id"/>
+    <xsl:param name="data"/>
+    <!-- HGV -->
+    <xsl:variable name="hgv" select="$IDNOS//tei:item[@tm=$id][@hgv]/@hgv"/>
+    <xsl:for-each select="$hgv">
+      <xsl:variable name="in" select="concat('../idp.data/papyri/master/', papy:hgvFilePath(.))"/>
+      <xsl:variable name="out" select="replace($in, 'master', 'xwalk')"/>
+      <xsl:result-document href="{$out}" method="xml" media-type="text/xml" indent="yes">
+        <xsl:apply-templates select="doc($in)" mode="copy">
+          <xsl:with-param name="data" select="$data"/>
+        </xsl:apply-templates>
+      </xsl:result-document>
+      <xsl:message select="concat($id, '/', .)"/>
+    </xsl:for-each>
+    <!-- DCLP -->
+    <xsl:variable name="dclp" select="$IDNOS//tei:item[@tm=$id][@dclp]/@dclp"/>
+    <xsl:for-each select="$dclp">
+      <xsl:variable name="in" select="concat('../idp.data/papyri/master/', papy:dclpFilePath($id))"/>
+      <xsl:variable name="out" select="replace($in, 'master', 'xwalk')"/>
+      <xsl:result-document href="{$out}" method="xml" media-type="text/xml" indent="yes">
+        <xsl:apply-templates select="doc($in)" mode="copy_dclp">
+          <xsl:with-param name="data" select="$data"/>
+        </xsl:apply-templates>
+      </xsl:result-document>
+      <xsl:message select="concat('_____ ', $tm, '/', .)"/>
+    </xsl:for-each>
   </xsl:template>
 
   <!-- HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV -->
