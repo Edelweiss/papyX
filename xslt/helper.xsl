@@ -71,7 +71,7 @@
       <xsl:param name="headerKey" as="xs:string"/>
       <xsl:variable name="header" as="xs:integer">
         <xsl:choose>
-          <xsl:when test="$headerLine">
+          <xsl:when test="number($headerLine)">
             <xsl:value-of select="$headerLine"/>
           </xsl:when>
           <xsl:when test="string($headerKey)">
