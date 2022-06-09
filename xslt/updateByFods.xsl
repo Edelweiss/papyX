@@ -12,7 +12,8 @@
     xmlns="http://www.tei-c.org/ns/1.0"
     xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0">
   <!--
-      java -Xms512m -Xmx1536m net.sf.saxon.Transform -s:data/provenance_nome.fods -o:data/provenance_nome.xml -it:FODS -xsl:xslt/updateByFods.xsl
+      java -Xms512m -Xmx1536m net.sf.saxon.Transform -s:data/provenance_nome2.fods -o:data/provenance_nome.xml -it:FODS -xsl:xslt/updateByFods.xsl
+      java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/NO_NOME_NO_PROVINCE.xml -it:NO_NOME_NO_PROVINCE -xsl:xslt/updateByFods.xsl
     -->
 
   <xsl:output method="xml" media-type="text/xml" />
@@ -26,6 +27,17 @@
   <xsl:param name="IDP_DATA_READ" select="'../idp.data/papyri/master'"/>
   <xsl:param name="IDP_DATA_WRITE" select="'../idp.data/papyri/xwalk'"/>
 
+  <xsl:template name="NO_NOME_NO_PROVINCE">
+    <xsl:for-each select="collection(concat($IDP_DATA_READ, '/HGV_meta_EpiDoc/?select=*.xml;recurse=yes'))[not(.//tei:placeName[@subtype = 'nome'])][not(.//tei:placeName[@subtype = 'province'])]">
+      <xsl:message select="concat('____ ', string-join(.//tei:idno[@type='ddb-hybrid'], ', '), ' (', string-join(.//tei:idno[@type='filename'], ', '), ')')"/>
+      <xsl:message select="string(.//tei:origPlace)"/>
+
+    </xsl:for-each>
+    <!--
+      'Antaiopolites', 'Antinoites', 'Aphroditopolites', 'Apollonopolites', 'Apollonopolites Heptakomias', 'Arsinoites', 'Athribites', 'Busirites', 'Eileithyiopolites', 'Fayūm', 'Heliopolites', 'Herakleopolites', 'Hermonthites', 'Hermopolites', 'Kabasites', 'Koptites', 'Kussites', 'Kynopolites', 'Latopolites', 'Leontopolites', 'Letopolites', 'Lykopolites', 'Memphites', 'Mendesios', 'Oasis Magna', 'Oxyrhynchites', 'Panopolites', 'Pathyrites', 'Pharbaithites', 'Prosopites', 'Theben', 'Theodosiopolites', 'Thinites' 
+    -->
+  </xsl:template>
+
   <xsl:template name="FODS">
     <xsl:variable name="fods">
       <xsl:call-template name="papy:fodsIndexData">
@@ -37,7 +49,8 @@
     </xsl:variable>
     <!--xsl:message select="$fods"></xsl:message-->
     
-    <xsl:for-each select="collection(concat($IDP_DATA_READ, '/HGV_meta_EpiDoc/?select=*.xml;recurse=yes'))[.//tei:placeName[@subtype = 'nome'][string(.) = ('Antaiopolites', 'Antinoites', 'Aphroditopolites', 'Apollonopolites', 'Apollonopolites Heptakomias', 'Arsinoites', 'Athribites', 'Busirites', 'Eileithyiopolites', 'Fayūm', 'Heliopolites', 'Herakleopolites', 'Hermonthites', 'Hermopolites', 'Kabasites', 'Koptites', 'Kussites', 'Kynopolites', 'Latopolites', 'Leontopolites', 'Letopolites', 'Lykopolites', 'Memphites', 'Mendesios', 'Oasis Magna', 'Oxyrhynchites', 'Panopolites', 'Pathyrites', 'Pharbaithites', 'Prosopites', 'Theben', 'Theodosiopolites', 'Thinites')]]">
+    <!--xsl:for-each select="collection(concat($IDP_DATA_READ, '/HGV_meta_EpiDoc/?select=*.xml;recurse=yes'))[.//tei:placeName[@subtype = 'nome'][string(.) = ('Antaiopolites', 'Antinoites', 'Aphroditopolites', 'Apollonopolites', 'Apollonopolites Heptakomias', 'Arsinoites', 'Athribites', 'Busirites', 'Eileithyiopolites', 'Fayūm', 'Heliopolites', 'Herakleopolites', 'Hermonthites', 'Hermopolites', 'Kabasites', 'Koptites', 'Kussites', 'Kynopolites', 'Latopolites', 'Leontopolites', 'Letopolites', 'Lykopolites', 'Memphites', 'Mendesios', 'Oasis Magna', 'Oxyrhynchites', 'Panopolites', 'Pathyrites', 'Pharbaithites', 'Prosopites', 'Theben', 'Theodosiopolites', 'Thinites')]]"-->
+    <xsl:for-each select="collection(concat($IDP_DATA_READ, '/HGV_meta_EpiDoc/?select=*.xml;recurse=yes'))[.//tei:placeName[@subtype = 'nome'][string(.) = ('Bubastites, Delta', 'Gynaikopolites', 'Menelaites', 'Metelites', 'Onuphites', 'Saites', 'Sebennytes', 'Sethroites', 'Tanites', 'Tentyrites')]]">
       <xsl:message select="concat('____ ', string-join(.//tei:idno[@type='ddb-hybrid'], ', '), ' (', string-join(.//tei:placeName[@subtype = 'nome'], '|'),')')"/>
       <xsl:result-document href="{replace(base-uri(.), 'master', 'xwalk')}" method="xml" media-type="text/xml" indent="yes">
         <xsl:apply-templates mode="copy">
@@ -46,7 +59,8 @@
       </xsl:result-document>
     </xsl:for-each>
     <!--
-      'Antaiopolites', 'Antinoites', 'Aphroditopolites', 'Apollonopolites', 'Apollonopolites Heptakomias', 'Arsinoites', 'Athribites', 'Busirites', 'Eileithyiopolites', 'Fayūm', 'Heliopolites', 'Herakleopolites', 'Hermonthites', 'Hermopolites', 'Kabasites', 'Koptites', 'Kussites', 'Kynopolites', 'Latopolites', 'Leontopolites', 'Letopolites', 'Lykopolites', 'Memphites', 'Mendesios', 'Oasis Magna', 'Oxyrhynchites', 'Panopolites', 'Pathyrites', 'Pharbaithites', 'Prosopites', 'Theben', 'Theodosiopolites', 'Thinites' 
+      'Antaiopolites', 'Antinoites', 'Aphroditopolites', 'Apollonopolites', 'Apollonopolites Heptakomias', 'Arsinoites', 'Athribites', 'Busirites', 'Eileithyiopolites', 'Fayūm', 'Heliopolites', 'Herakleopolites', 'Hermonthites', 'Hermopolites', 'Kabasites', 'Koptites', 'Kussites', 'Kynopolites', 'Latopolites', 'Leontopolites', 'Letopolites', 'Lykopolites', 'Memphites', 'Mendesios', 'Oasis Magna', 'Oxyrhynchites', 'Panopolites', 'Pathyrites', 'Pharbaithites', 'Prosopites', 'Theben', 'Theodosiopolites', 'Thinites'
+      'Bubastites, Delta', 'Gynaikopolites', 'Menelaites', 'Metelites', 'Onuphites', 'Saites', 'Sebennytes', 'Sethroites', 'Tanites', 'Tentyrites'
     -->
   </xsl:template>
 
