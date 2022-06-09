@@ -23,15 +23,13 @@
     <xsl:template name="GEO">
       <xsl:param name="idp.data"/>
         <list>
-            <xsl:for-each-group select="collection(concat($idp.data, '/HGV_meta_EpiDoc', '?select=*.xml;recurse=yes'))//tei:provenance" group-by="string(.)">
+            <xsl:for-each-group select="collection(concat($idp.data, '/HGV_meta_EpiDoc', '?select=*.xml;recurse=yes'))//tei:provenance/tei:p" group-by="string(.)">
                 <xsl:message select="concat(position(), ' ', normalize-space(current-grouping-key()))"></xsl:message>
                 <xsl:variable name="hgv" select="string-join(current-group()/ancestor::tei:TEI//tei:idno[@type='filename'], ' ')"/>
                 <item count="{count(current-group())}" hgv="{$hgv}">
-                  <xsl:for-each select="current-group()[1]//tei:placeName">
+                  <xsl:for-each select="current-group()[1]/tei:placeName">
                     <xsl:variable name="subtype" select="@subtype"/>
-                    <xsl:variable name="ref" select="string-join(distinct-values(tokenize(normalize-space(string-join(current-group()//tei:placeName[@subtype = $subtype]/@ref, ' ')), ' ')), ' ')"/>
-                    
-
+                    <xsl:variable name="ref" select="string-join(distinct-values(tokenize(normalize-space(string-join(current-group()/tei:placeName[@subtype = $subtype]/@ref, ' ')), ' ')), ' ')"/>
                     <geo type="{if(string(@subtype))then(@subtype)else(@type)}" ref="{$ref}">
                       <xsl:value-of select="."/>
                     </geo>
