@@ -23,7 +23,7 @@
 
 <xsl:template name="GET_GEO">
     <xsl:call-template name="GEO">
-        <xsl:with-param name="idp.data" select="'../idp.data/papyri/master'"/>
+        <xsl:with-param name="idp.data" select="'../idp.data/papyri/xwalk'"/>
     </xsl:call-template>
 </xsl:template>
 
