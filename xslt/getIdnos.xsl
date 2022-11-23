@@ -13,6 +13,7 @@
 
     <!--
     java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/IDNOS.xml -it:GET_IDNOS -xsl:xslt/getIdnos.xsl > getIdnos 2>&1
+    java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/REDIRECTS.xml -it:GET_REDIRECTS -xsl:xslt/getIdnos.xsl > getRedirects 2>&1
     -->
 
     <xsl:output method="xml" media-type="text/xml" />
@@ -21,7 +22,12 @@
     <xsl:template name="GET_IDNOS">
         <xsl:call-template name="IDNOS">
             <xsl:with-param name="idp.data" select="'../idp.data/papyri/master'"/>
-            <xsl:with-param name="reference" select="'HGV'"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template name="GET_REDIRECTS">
+        <xsl:call-template name="REDIRECTS">
+            <xsl:with-param name="idp.data" select="'../idp.data/papyri/master'"/>
         </xsl:call-template>
     </xsl:template>
 

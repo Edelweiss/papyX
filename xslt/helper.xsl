@@ -42,34 +42,121 @@
 <!-- IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS IDNOS -->
 
   <xsl:variable name="IDNOS" select="document('../data/IDNOS.xml')"/>
-
+  
   <xsl:template name="IDNOS">
     <xsl:param name="idp.data"/>
-    <xsl:param name="reference" select="'HGV'"/><!-- HGV or DDB -->
-    <xsl:variable name="folder" select="if($reference = 'DDB')then('DDB_EpiDoc_XML')else('HGV_meta_EpiDoc')"/>
-    <xsl:variable name="idnoTypeHgv" select="if($reference = 'DDB')then('HGV')else('filename')"/>
-      <list>
-          <xsl:for-each select="collection(concat($idp.data, '/', $folder, '?select=*.xml;recurse=yes'))[not(.//tei:ref[@type='reprint-in'])]">
-              <xsl:variable name="ddbList" select=".//tei:idno[@type='ddb-hybrid']/string(.)"/>
-              <xsl:variable name="hgvList" select="tokenize(string-join(.//tei:idno[@type=$idnoTypeHgv], ' '), ' ')"/>
 
-              <xsl:for-each select="$hgvList">
-                  <xsl:variable name="hgv" select="string(.)"/>
-                  <xsl:for-each select="$ddbList">
-                      <xsl:variable name="ddb" select="string(.)"/>
-                      <xsl:message select="concat('____', $ddb, ' / ', $hgv)"/>
-                      <item ddb="{$ddb}" hgv="{$hgv}" tm="{replace($hgv, '[^\d]+', '')}"/>
-                  </xsl:for-each>
-              </xsl:for-each>
+    <xsl:variable name="hgvBased">
+      <xsl:call-template name="IDNOS_FROM_COLLECTION">
+        <xsl:with-param name="idp.data" select="$idp.data"/>
+        <xsl:with-param name="collection" select="'HGV'"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:variable name="ddbBased">
+      <xsl:call-template name="IDNOS_FROM_COLLECTION">
+        <xsl:with-param name="idp.data" select="$idp.data"/>
+        <xsl:with-param name="collection" select="'DDB'"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <list>
+      <xsl:for-each select="$hgvBased//tei:item">
+        <xsl:variable name="hgv" select="string(@hgv)"/>
+        <xsl:variable name="tm" select="string(@tm)"/>
+        <xsl:copy>
+          <xsl:copy-of select="@hgv"/>
+          <xsl:copy-of select="@tm"/>
+          <xsl:choose>
+            <xsl:when test="@ddb">
+              <xsl:copy-of select="@ddb"/>
+            </xsl:when>
+            <xsl:when test="$ddbBased//tei:item[@hgv = $hgv]">
+              <xsl:copy-of select="$ddbBased//tei:item[@hgv = $hgv]/@ddb"/>
+            </xsl:when>
+            <xsl:when test="$ddbBased//tei:item[@tm = $tm]">
+              <xsl:copy-of select="$ddbBased//tei:item[@tm = $tm]/@ddb"/>
+            </xsl:when>
+          </xsl:choose>
+          <xsl:copy-of select="@dclp"/>
+        </xsl:copy>
+      </xsl:for-each>
+
+      <xsl:for-each select="$ddbBased//tei:item">
+        <xsl:variable name="hgv" select="string(@hgv)"/>
+        <xsl:variable name="tm" select="string(@tm)"/>
+        <xsl:variable name="ddb" select="string(@ddb)"/>
+        <xsl:if test="not($hgvBased//tei:item[@ddb = $ddb]) and not($hgvBased//tei:item[@hgv = $hgv]) and not($hgvBased//tei:item[@tm = $tm])">
+          <xsl:copy-of select="."/>
+        </xsl:if>
+      </xsl:for-each>
+
+      <xsl:for-each select="collection(concat($idp.data, '/DCLP?select=*.xml;recurse=yes'))">
+        <xsl:variable name="dclp" select="string(.//tei:idno[@type='dclp-hybrid'][1])"/>
+        <xsl:variable name="tm" select="string(.//tei:idno[@type='TM'])"/>
+        <xsl:if test="not($hgvBased//tei:item[@dclp = $dclp]) and not($ddbBased//tei:item[@dclp = $dclp])">
+          <!-- xsl:message select="concat('____', $dclp, ' / ', $tm)"/-->
+          <item dclp="{$dclp}" tm="{$tm}"/>
+        </xsl:if>
+      </xsl:for-each>
+    </list>
+  </xsl:template>
+
+  <xsl:template name="IDNOS_FROM_COLLECTION">
+    <xsl:param name="idp.data"/>
+    <xsl:param name="collection" select="'HGV'"/><!-- HGV or DDB -->
+    <xsl:variable name="folder" select="if($collection = 'DDB')then('DDB_EpiDoc_XML')else('HGV_meta_EpiDoc')"/>
+    <xsl:variable name="idnoTypeHgv" select="if($collection = 'DDB')then('HGV')else('filename')"/>
+    <list collection="{$collection}">
+        <xsl:for-each select="collection(concat($idp.data, '/', $folder, '?select=*.xml;recurse=yes'))[not(.//tei:ref[@type='reprint-in'])]">
+          <xsl:variable name="ddbList" select=".//tei:idno[@type='ddb-hybrid']/string(.)"/>
+          <xsl:variable name="hgvList" select="tokenize(string-join(.//tei:idno[@type=$idnoTypeHgv], ' '), ' ')"/>
+          
+          <xsl:for-each select="$hgvList">
+            <xsl:variable name="hgv" select="string(.)"/>
+            <xsl:variable name="tm" select="replace($hgv, '[^\d]+', '')"/>
+            <xsl:variable name="dclpFile" select="concat($idp.data, '/DCLP/', ceiling(number($tm) div 1000), '/', $tm, '.xml')"/>
+            <xsl:variable name="dclpEpiDoc" select="if(doc-available($dclpFile))then(doc($dclpFile))else()"/>
+            <xsl:variable name="dclp" select="if($dclpEpiDoc)then(string($dclpEpiDoc//tei:publicationStmt/tei:idno[@type = 'dclp-hybrid']))else()"/>
+            
+            <xsl:for-each select="$ddbList">
+              <xsl:variable name="ddb" select="string(.)"/>
+              <!-- xsl:message select="concat('____', $collection, '____', string-join(($ddb, $hgv, $tm, $dclp), ' / '))"/-->
+              <item ddb="{$ddb}" hgv="{$hgv}" tm="{$tm}">
+                <xsl:if test="$dclp">
+                  <xsl:attribute name="dclp" select="$dclp"/>
+                </xsl:if>
+              </item>
+            </xsl:for-each>
           </xsl:for-each>
-          <xsl:for-each select="collection(concat($idp.data, '/DCLP?select=*.xml;recurse=yes'))">
-            <xsl:variable name="dclp" select="string(.//tei:idno[@type='dclp-hybrid'][1])"/>
-            <xsl:variable name="tm" select="string(.//tei:idno[@type='TM'])"/>
-            <xsl:message select="concat('____', $dclp, ' / ', $tm)"/>
-            <item dclp="{$dclp}" tm="{$tm}"/>
+        </xsl:for-each>
+    </list>
+  </xsl:template>
+  
+  <xsl:variable name="REDIRECTS" select="document('../data/REDIRECTS.xml')"/>
+  
+  <xsl:template name="REDIRECTS">
+    <xsl:param name="idp.data"/>
+    <list>
+      <xsl:for-each select="collection(concat($idp.data, '/DDB_EpiDoc_XML?select=*.xml;recurse=yes'))[.//tei:ref[@type = 'reprint-in']]">
+        <xsl:variable name="ddbList" select=".//tei:idno[@type='ddb-hybrid']/string(.)"/>
+        <xsl:variable name="hgvList" select="tokenize(string-join(.//tei:idno[@type = 'HGV'], ' '), ' ')"/>
+        <xsl:variable name="ddbReprintList" select=".//tei:ref[@type = 'reprint-in']/@n"/>
+        
+        <xsl:for-each select="$hgvList">
+          <xsl:variable name="hgv" select="string(.)"/>
+          <xsl:for-each select="$ddbList">
+            <xsl:variable name="ddb" select="string(.)"/>
+            <xsl:for-each select="$ddbReprintList">
+              <xsl:variable name="reprint" select="string(.)"/>
+              <xsl:message select="concat('____', $ddb, ' / ', $reprint, ' / ', $hgv)"/>
+              <item ddb="{$ddb}" ddb-reprint="{$reprint}" hgv="{$hgv}" tm="{replace($hgv, '[^\d]+', '')}"/>
+            </xsl:for-each>
           </xsl:for-each>
-        </list>
-    </xsl:template>
+        </xsl:for-each>
+      </xsl:for-each>
+    </list>
+  </xsl:template>
 
 <!-- CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV CSV -->
 
