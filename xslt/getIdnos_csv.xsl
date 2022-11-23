@@ -24,12 +24,12 @@
             <xsl:with-param name="data" select="('HGV', 'TM', 'DDB', 'DCLP')"/>
         </xsl:call-template>
         <xsl:for-each select="$IDNOS//tei:item">
-            <xsl:variable name="hgv" select="if(@hgv)then(string(@hgv))else(' ')"/>
-            <xsl:variable name="tm" select="if(@tm)then(string(@tm))else(' ')"/>
-            <xsl:variable name="ddb" select="if(@ddb)then(string(@ddb))else(' ')"/>
-            <xsl:variable name="dclp" select="if(@dclp)then(string(@dclp))else(' ')"/>
+            <xsl:variable name="hgv" select="if(@hgv)then(string(@hgv))else('')"/>
+            <xsl:variable name="tm" select="if(@tm)then(string(@tm))else('')"/>
+            <xsl:variable name="ddb" select="if(@ddb)then(string(@ddb))else('')"/>
+            <xsl:variable name="dclp" select="if(@dclp)then(string(@dclp))else('')"/>
             <xsl:call-template name="papy:csvLine">
-                <xsl:with-param name="data" select="(@hgv, @tm, @ddb, @dclp)"/>
+                <xsl:with-param name="data" select="($hgv, $tm, $ddb, $dclp)"/>
             </xsl:call-template>
         </xsl:for-each>
     </xsl:template>
