@@ -12,8 +12,8 @@
     xmlns="http://www.tei-c.org/ns/1.0">
 
     <!--
-    java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/IDNOS.xml -it:GET_IDNOS -xsl:xslt/getIdnos.xsl > getIdnos 2>&1
     java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/IDNOS.csv -it:GET_IDNOS -xsl:xslt/getIdnos_csv.xsl > getIdnos_csv 2>&1
+    java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/REDIRECTS.csv -it:GET_REDIRECTS -xsl:xslt/getIdnos_csv.xsl > getRedirects_csv 2>&1
     -->
 
     <xsl:output method="text" media-type="text/csv" />
@@ -33,6 +33,21 @@
                     <xsl:with-param name="data" select="($hgv, $tm, $ddb, $dclp)"/>
                 </xsl:call-template>
             </xsl:if>
+        </xsl:for-each>
+    </xsl:template>
+
+    <xsl:template name="GET_REDIRECTS">
+        <xsl:call-template name="papy:csvLine">
+            <xsl:with-param name="data" select="('ddb', 'ddb-reprint', 'hgv', 'tm')"/>
+        </xsl:call-template>
+        <xsl:for-each select="$REDIRECTS//tei:item">
+            <xsl:variable name="hgv" select="if(@hgv)then(string(@hgv))else('')"/>
+            <xsl:variable name="tm" select="if(@tm)then(string(@tm))else('')"/>
+            <xsl:variable name="ddb" select="if(@ddb)then(string(@ddb))else('')"/>
+            <xsl:variable name="ddbReprint" select="if(@ddb-reprint)then(string(@ddb-reprint))else('')"/>
+            <xsl:call-template name="papy:csvLine">
+                <xsl:with-param name="data" select="($ddb, $ddbReprint, $hgv, $tm)"/>
+            </xsl:call-template>
         </xsl:for-each>
     </xsl:template>
 
