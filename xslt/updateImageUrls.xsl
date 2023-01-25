@@ -22,7 +22,7 @@
     <xsl:param name="TABLE" select="'update image urls'" as="xs:string"/>
     <xsl:param name="ID_COLUMN" select="1" as="xs:integer"/>
     <xsl:param name="URL_COLUMN" select="2" as="xs:integer"/>
-    <xsl:param name="IDENTIFIER" select="'HGV'" as="xs:string"/><!--HGV or TM -->
+    <xsl:param name="IDENTIFIER" select="'HGV'" as="xs:string"/><!--HGV, TM or DDB -->
     <xsl:param name="HEADER" select="0" as="xs:integer"/><!-- number of header lines in the input document -->
     <xsl:param name="KILL_URL" select="'ALL_FIGURE_GRAPHIC_URLS_CONTAINING_THIS_STRING_WILL_BE_DROPPED_DURING_ID_TRANSFORMATION'"/>
 
@@ -37,7 +37,7 @@
 
     <xsl:template name="UPDATE_IMAGES">
 
-        <xsl:for-each-group select="$IMAGE_URLS//table:table[@table:name=$TABLE]/table:table-row[position() &gt; $HEADER][matches(normalize-space(table:table-cell[$ID_COLUMN]), '^\d+[^a-z]*$')]" group-by="normalize-space(table:table-cell[$ID_COLUMN])">
+        <xsl:for-each-group select="$IMAGE_URLS//table:table[@table:name=$TABLE]/table:table-row[position() &gt; $HEADER][matches(normalize-space(table:table-cell[$ID_COLUMN]), '^\d+[^a-z]*|[a-z].+;.*;.+$')]" group-by="normalize-space(table:table-cell[$ID_COLUMN])">
             <xsl:variable name="id" select="current-grouping-key()"/>
             <!-- HGV -->
             <xsl:variable name="hgvList" as="item()*">
@@ -47,6 +47,9 @@
                     </xsl:when>
                     <xsl:when test="$IDENTIFIER = 'TM'">
                         <xsl:copy-of select="$IDNOS//tei:item[@tm = $id][@hgv]/string(@hgv)"/>
+                    </xsl:when>
+                    <xsl:when test="$IDENTIFIER = 'DDB'">
+                        <xsl:copy-of select="$IDNOS//tei:item[@ddb = $id][@hgv]/string(@hgv)"/>
                     </xsl:when>
                 </xsl:choose>
             </xsl:variable>
@@ -68,7 +71,21 @@
             </xsl:choose>
 
             <!-- DCLP -->
-            <xsl:variable name="dclpList" select="$IDNOS//tei:item[@tm = $id][@dclp]/string(@tm)" as="item()*"/>
+            <xsl:variable name="dclpList" as="item()*">
+                    <xsl:choose>
+                        <xsl:when test="$IDENTIFIER = 'HGV'">
+                            <xsl:copy-of select="$IDNOS//tei:item[@tm = replace($id, '[a-z]+', '')][@dclp]/string(@tm)"/>
+                        </xsl:when>
+                        <xsl:when test="$IDENTIFIER = 'TM'">
+                            <xsl:copy-of select="$IDNOS//tei:item[@tm = $id][@dclp]/string(@tm)"/>
+                        </xsl:when>
+                        <xsl:when test="$IDENTIFIER = 'DDB'">
+                            <xsl:copy-of select="$IDNOS//tei:item[@dclp = $id]/string(@tm)"/>
+                        </xsl:when>
+                    </xsl:choose>
+            </xsl:variable>
+
+            <!--xsl:message select="concat('DCLP LIST ', string(count($dclpList)), string-join($dclpList, ', '))" /-->
 
             <xsl:choose>
                 <xsl:when test="count($dclpList) &gt; 0">
@@ -89,6 +106,7 @@
         <xsl:message select="concat('____ input file: ', $DATA_FILE, '::', $TABLE)"/>
     </xsl:template>
 
+    <!-- HGV -->
     <xsl:template match="tei:div[@type='figure']/tei:p" mode="copy">
         <xsl:copy>
             <xsl:apply-templates select="tei:figure[not(contains(tei:graphic/@url, $KILL_URL))]" mode="copy"/>
@@ -108,7 +126,7 @@
     </xsl:template>
 
     <xsl:template name="figure">
-        <xsl:variable name="id" select="string(if($IDENTIFIER = 'HGV')then(/tei:TEI//tei:idno[@type='filename'])else(/tei:TEI//tei:idno[@type='TM']))"/>
+        <xsl:variable name="id" select="string(if($IDENTIFIER = 'HGV')then(/tei:TEI//tei:idno[@type='filename'])else(if($IDENTIFIER = 'TM')then(/tei:TEI//tei:idno[@type='TM'])else(/tei:TEI//tei:idno[@type='ddb-hybrid'])))"/>
         <xsl:variable name="urlList" select="$IMAGE_URLS//table:table[@table:name=$TABLE]/table:table-row[normalize-space(table:table-cell[$ID_COLUMN]) = $id]"/>
         <xsl:for-each select="$urlList">
             <xsl:variable name="url" select="normalize-space(table:table-cell[$URL_COLUMN])"/>
@@ -141,6 +159,7 @@
 
     <xsl:template name="ptr">
         <xsl:variable name="id" select="string(/tei:TEI//tei:idno[@type='TM'])"/>
+        <xsl:variable name="id" select="string(if($IDENTIFIER = 'TM')then(/tei:TEI//tei:idno[@type='TM'])else(if($IDENTIFIER = 'HGV')then(/tei:TEI//tei:idno[@type='HGV'])else(/tei:TEI//tei:idno[@type='dclp-hybrid'])))"/>
         <xsl:variable name="urlList" select="$IMAGE_URLS//table:table[@table:name=$TABLE]/table:table-row[normalize-space(table:table-cell[$ID_COLUMN]) = $id]"/>
         <xsl:for-each select="$urlList">
             <xsl:variable name="url" select="normalize-space(table:table-cell[$URL_COLUMN])"/>

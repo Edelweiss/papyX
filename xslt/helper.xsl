@@ -115,24 +115,26 @@
           <xsl:for-each select="$hgvList">
             <xsl:variable name="hgv" select="string(.)"/>
             <xsl:variable name="tm" select="replace($hgv, '[^\d]+', '')"/>
-            <xsl:variable name="dclpFile" select="concat($idp.data, '/DCLP/', ceiling(number($tm) div 1000), '/', $tm, '.xml')"/>
-            <xsl:variable name="dclpEpiDoc" select="if(doc-available($dclpFile))then(doc($dclpFile))else()"/>
-            <xsl:variable name="dclp" select="if($dclpEpiDoc)then(string($dclpEpiDoc//tei:publicationStmt/tei:idno[@type = 'dclp-hybrid']))else()"/>
-            
-            <xsl:for-each select="$ddbList">
-              <xsl:variable name="ddb" select="string(.)"/>
-              <!-- xsl:message select="concat('____', $collection, '____', string-join(($ddb, $hgv, $tm, $dclp), ' / '))"/-->
-              <item ddb="{$ddb}" hgv="{$hgv}" tm="{$tm}">
-                <xsl:if test="$dclp">
-                  <xsl:attribute name="dclp" select="$dclp"/>
-                </xsl:if>
-              </item>
-            </xsl:for-each>
+            <xsl:if test="number($tm) &lt; 500000 or number($tm) &gt; 500100">
+              <xsl:variable name="dclpFile" select="concat($idp.data, '/DCLP/', ceiling(number($tm) div 1000), '/', $tm, '.xml')"/>
+              <xsl:variable name="dclpEpiDoc" select="if(doc-available($dclpFile))then(doc($dclpFile))else()"/>
+              <xsl:variable name="dclp" select="if($dclpEpiDoc)then(string($dclpEpiDoc//tei:publicationStmt/tei:idno[@type = 'dclp-hybrid']))else()"/>
+
+              <xsl:for-each select="$ddbList">
+                <xsl:variable name="ddb" select="string(.)"/>
+                <!-- xsl:message select="concat('____', $collection, '____', string-join(($ddb, $hgv, $tm, $dclp), ' / '))"/-->
+                <item ddb="{$ddb}" hgv="{$hgv}" tm="{$tm}">
+                  <xsl:if test="$dclp">
+                    <xsl:attribute name="dclp" select="$dclp"/>
+                  </xsl:if>
+                </item>
+              </xsl:for-each>
+            </xsl:if>
           </xsl:for-each>
         </xsl:for-each>
     </list>
   </xsl:template>
-  
+
   <xsl:variable name="REDIRECTS" select="document('../data/REDIRECTS.xml')"/>
   
   <xsl:template name="REDIRECTS">
@@ -170,7 +172,7 @@
 
   <xsl:function name="papy:makeCsvSafe">
     <xsl:param name="in"/>
-    <xsl:value-of select="replace($in, $apo, concat($apo, $apo))"/>
+    <xsl:value-of select="replace(string($in), $apo, concat($apo, $apo))"/>
   </xsl:function>
 
   <!-- FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS FODS -->

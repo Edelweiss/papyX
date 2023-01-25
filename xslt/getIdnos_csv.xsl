@@ -28,9 +28,11 @@
             <xsl:variable name="tm" select="if(@tm)then(string(@tm))else('')"/>
             <xsl:variable name="ddb" select="if(@ddb)then(string(@ddb))else('')"/>
             <xsl:variable name="dclp" select="if(@dclp)then(string(@dclp))else('')"/>
-            <xsl:call-template name="papy:csvLine">
-                <xsl:with-param name="data" select="($hgv, $tm, $ddb, $dclp)"/>
-            </xsl:call-template>
+            <xsl:if test="string($hgv) or string($ddb) or (string($dclp) and not(starts-with($dclp, 'tm;;')))">
+                <xsl:call-template name="papy:csvLine">
+                    <xsl:with-param name="data" select="($hgv, $tm, $ddb, $dclp)"/>
+                </xsl:call-template>
+            </xsl:if>
         </xsl:for-each>
     </xsl:template>
 
