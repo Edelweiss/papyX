@@ -31,7 +31,6 @@
     <xsl:template name="UPDATE_IDNOS">
         <xsl:call-template name="IDNOS">
             <xsl:with-param name="idp.data" select="$IDP-DATA_READ"/>
-            <xsl:with-param name="reference" select="'HGV'"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -72,17 +71,17 @@
 
             <!-- DCLP -->
             <xsl:variable name="dclpList" as="item()*">
-                    <xsl:choose>
-                        <xsl:when test="$IDENTIFIER = 'HGV'">
-                            <xsl:copy-of select="$IDNOS//tei:item[@tm = replace($id, '[a-z]+', '')][@dclp]/string(@tm)"/>
-                        </xsl:when>
-                        <xsl:when test="$IDENTIFIER = 'TM'">
-                            <xsl:copy-of select="$IDNOS//tei:item[@tm = $id][@dclp]/string(@tm)"/>
-                        </xsl:when>
-                        <xsl:when test="$IDENTIFIER = 'DDB'">
-                            <xsl:copy-of select="$IDNOS//tei:item[@dclp = $id]/string(@tm)"/>
-                        </xsl:when>
-                    </xsl:choose>
+                <xsl:choose>
+                    <xsl:when test="$IDENTIFIER = 'HGV'">
+                        <xsl:copy-of select="$IDNOS//tei:item[@tm = replace($id, '[a-z]+', '')][@dclp]/string(@tm)"/>
+                    </xsl:when>
+                    <xsl:when test="$IDENTIFIER = 'TM'">
+                        <xsl:copy-of select="$IDNOS//tei:item[@tm = $id][@dclp]/string(@tm)"/>
+                    </xsl:when>
+                    <xsl:when test="$IDENTIFIER = 'DDB'">
+                        <xsl:copy-of select="$IDNOS//tei:item[@dclp = $id]/string(@tm)"/>
+                    </xsl:when>
+                </xsl:choose>
             </xsl:variable>
 
             <!--xsl:message select="concat('DCLP LIST ', string(count($dclpList)), string-join($dclpList, ', '))" /-->
@@ -127,13 +126,21 @@
 
     <xsl:template name="figure">
         <xsl:variable name="id" select="string(if($IDENTIFIER = 'HGV')then(/tei:TEI//tei:idno[@type='filename'])else(if($IDENTIFIER = 'TM')then(/tei:TEI//tei:idno[@type='TM'])else(/tei:TEI//tei:idno[@type='ddb-hybrid'])))"/>
+        <xsl:variable name="oldList" select="/tei:TEI//tei:div[@type='figure']/tei:p/tei:figure/tei:graphic[not(contains(@url, $KILL_URL))]/string(@url)" />
         <xsl:variable name="urlList" select="$IMAGE_URLS//table:table[@table:name=$TABLE]/table:table-row[normalize-space(table:table-cell[$ID_COLUMN]) = $id]"/>
         <xsl:for-each select="$urlList">
             <xsl:variable name="url" select="normalize-space(table:table-cell[$URL_COLUMN])"/>
-            <xsl:message select="$url"/>
-            <figure>
-                <graphic url="{$url}"/>
-            </figure>
+            <xsl:choose>
+                <xsl:when test="not($url = $oldList)">
+                    <xsl:message select="concat($url, ' ', 'NEW')"/>
+                    <figure>
+                        <graphic url="{$url}"/>
+                    </figure>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:message select="concat($url, ' ', 'OLD')"/>
+                </xsl:otherwise>
+            </xsl:choose>
         </xsl:for-each>
     </xsl:template>
 
@@ -160,13 +167,21 @@
     <xsl:template name="ptr">
         <xsl:variable name="id" select="string(/tei:TEI//tei:idno[@type='TM'])"/>
         <xsl:variable name="id" select="string(if($IDENTIFIER = 'TM')then(/tei:TEI//tei:idno[@type='TM'])else(if($IDENTIFIER = 'HGV')then(/tei:TEI//tei:idno[@type='HGV'])else(/tei:TEI//tei:idno[@type='dclp-hybrid'])))"/>
+        <xsl:variable name="oldList" select="/tei:TEI//tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl/tei:bibl[@type='online']/tei:ptr[not(contains(@target, $KILL_URL))]/string(@target)"/>
         <xsl:variable name="urlList" select="$IMAGE_URLS//table:table[@table:name=$TABLE]/table:table-row[normalize-space(table:table-cell[$ID_COLUMN]) = $id]"/>
         <xsl:for-each select="$urlList">
             <xsl:variable name="url" select="normalize-space(table:table-cell[$URL_COLUMN])"/>
-            <xsl:message select="$url"/>
-            <bibl type="online">
-                <ptr target="{$url}"/>
-            </bibl>
+            <xsl:choose>
+                <xsl:when test="not($url = $oldList)">
+                    <xsl:message select="concat($url, ' ', 'NEW')"/>
+                    <bibl type="online">
+                        <ptr target="{$url}"/>
+                    </bibl>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:message select="concat($url, ' ', 'OLD')"/>
+                </xsl:otherwise>
+            </xsl:choose>
         </xsl:for-each>
     </xsl:template>
 
