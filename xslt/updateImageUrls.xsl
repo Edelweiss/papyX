@@ -58,7 +58,7 @@
                   <xsl:for-each select="$hgvList">
                       <xsl:variable name="hgv" select="string(.)"/>
                       <xsl:variable name="hgvFile" select=" papy:hgvFilePath($hgv)"/>
-                      <xsl:message select="concat('____', $hgvFile)"/>
+                      <xsl:message select="concat($nl, '____ ', $hgv, ' ____ ', $hgvFile)"/>
                       <xsl:result-document href="{concat($IDP-DATA_WRITE, '/', $hgvFile)}" method="xml" media-type="text/xml" indent="yes">
                           <xsl:apply-templates select="doc(concat($IDP-DATA_READ, '/', $hgvFile))" mode="copy"/>
                       </xsl:result-document>
@@ -98,7 +98,7 @@
                     </xsl:for-each>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:message select="concat('WARNING: DCLP NOT FOUND ', $id)"/>
+                    <xsl:message select="concat('No DCLP for ', $id)"/>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:for-each-group>
@@ -132,13 +132,13 @@
             <xsl:variable name="url" select="normalize-space(table:table-cell[$URL_COLUMN])"/>
             <xsl:choose>
                 <xsl:when test="not($url = $oldList)">
-                    <xsl:message select="concat($url, ' ', 'NEW')"/>
+                    <xsl:message select="concat($url, ' NEW')"/>
                     <figure>
                         <graphic url="{$url}"/>
                     </figure>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:message select="concat($url, ' ', 'OLD')"/>
+                    <xsl:message select="concat($url, ' ALREADY EXISTS')"/>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:for-each>

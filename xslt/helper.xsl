@@ -15,6 +15,7 @@
   <xsl:variable name="apo" select="'&#x22;'"/>
   <xsl:variable name="gt" select="'&#x3e;'"/>
   <xsl:variable name="lt" select="'&#x3c;'"/>
+  <xsl:variable name="nl" select="'&#xa;'"/>
 
   <!-- GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO GEO -->
 
