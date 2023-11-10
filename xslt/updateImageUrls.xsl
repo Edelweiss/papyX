@@ -105,8 +105,26 @@
         <xsl:message select="concat('____ input file: ', $DATA_FILE, '::', $TABLE)"/>
     </xsl:template>
 
+    <xsl:template name="DELETE_IMAGES">
+        <xsl:message select="$KILL_URL"/>
+        <xsl:for-each select="collection(concat($IDP-DATA_READ, '/HGV_meta_EpiDoc/?select=*.xml;recurse=yes'))[.//tei:div[@type='figure']/tei:p/tei:figure/tei:graphic[contains(@url, $KILL_URL)]]">
+            <xsl:message select="'HGV found'"></xsl:message>
+            <xsl:result-document href="{replace(base-uri(.), 'master', 'xwalk')}" method="xml" media-type="text/xml" indent="yes">
+                <xsl:apply-templates mode="copy"/>
+            </xsl:result-document>
+        </xsl:for-each>
+        <xsl:for-each select="collection(concat($IDP-DATA_READ, '/DCLP/?select=*.xml;recurse=yes'))[.//tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl/tei:bibl[@type='online']/tei:ptr[contains(@target, $KILL_URL)]]">
+            <xsl:message select="'DCLP found'"></xsl:message>
+            <xsl:result-document href="{replace(base-uri(.), 'master', 'xwalk')}" method="xml" media-type="text/xml" indent="yes">
+                <xsl:apply-templates mode="copy_dclp"/>
+            </xsl:result-document>
+        </xsl:for-each>
+    </xsl:template>
+
     <!-- HGV -->
-    <xsl:template match="tei:div[@type='figure']/tei:p" mode="copy">
+    <xsl:template match="tei:div[@type='figure']/tei:p[not(tei:figure[not(contains(tei:graphic/@url, $KILL_URL))])]" mode="copy"/><!-- delete empty -->
+
+    <xsl:template match="tei:div[@type='figure']/tei:p[tei:figure[not(contains(tei:graphic/@url, $KILL_URL))]]" mode="copy">
         <xsl:copy>
             <xsl:apply-templates select="tei:figure[not(contains(tei:graphic/@url, $KILL_URL))]" mode="copy"/>
             <xsl:call-template name="figure"/>
@@ -145,7 +163,9 @@
     </xsl:template>
 
     <!-- DCLP -->
-    <xsl:template match="tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl" mode="copy_dclp">
+    <xsl:template match="tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl[not(tei:bibl[@type='printed']|tei:bibl[@type='online'][not(contains(tei:ptr/@target, $KILL_URL))])]" mode="copy_dclp"/><!-- delete empty -->
+
+    <xsl:template match="tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl[tei:bibl[@type='printed']|tei:bibl[@type='online'][not(contains(tei:ptr/@target, $KILL_URL))]]" mode="copy_dclp">
         <xsl:copy>
             <xsl:apply-templates select="tei:bibl[@type='printed']" mode="copy_dclp"/>
             <xsl:apply-templates select="tei:bibl[@type='online'][not(contains(tei:ptr/@target, $KILL_URL))]" mode="copy_dclp"/>

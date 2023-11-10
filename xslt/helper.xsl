@@ -65,7 +65,7 @@
       <xsl:for-each select="$hgvBased//tei:item">
         <xsl:variable name="hgv" select="string(@hgv)"/>
         <xsl:variable name="tm" select="string(@tm)"/>
-        <xsl:copy>
+        <xsl:copy><!-- item HGV -->
           <xsl:copy-of select="@hgv"/>
           <xsl:copy-of select="@tm"/>
           <xsl:choose>
@@ -88,7 +88,7 @@
         <xsl:variable name="tm" select="string(@tm)"/>
         <xsl:variable name="ddb" select="string(@ddb)"/>
         <xsl:if test="not($hgvBased//tei:item[@ddb = $ddb]) and not($hgvBased//tei:item[@hgv = $hgv]) and not($hgvBased//tei:item[@tm = $tm])">
-          <xsl:copy-of select="."/>
+          <xsl:copy-of select="."/><!-- item DDB -->
         </xsl:if>
       </xsl:for-each>
 
@@ -96,7 +96,7 @@
         <xsl:variable name="dclp" select="string(.//tei:idno[@type='dclp-hybrid'][1])"/>
         <xsl:variable name="tm" select="string(.//tei:idno[@type='TM'])"/>
         <xsl:if test="not($hgvBased//tei:item[@dclp = $dclp]) and not($ddbBased//tei:item[@dclp = $dclp])">
-          <!-- xsl:message select="concat('____', $dclp, ' / ', $tm)"/-->
+          <!--xsl:message select="concat('____', $dclp, ' / ', $tm)"/-->
           <item dclp="{$dclp}" tm="{$tm}"/>
         </xsl:if>
       </xsl:for-each>
@@ -152,7 +152,7 @@
             <xsl:variable name="ddb" select="string(.)"/>
             <xsl:for-each select="$ddbReprintList">
               <xsl:variable name="reprint" select="string(.)"/>
-              <xsl:message select="concat('____', $ddb, ' / ', $reprint, ' / ', $hgv)"/>
+              <!--xsl:message select="concat('____', $ddb, ' / ', $reprint, ' / ', $hgv)"/-->
               <item ddb="{$ddb}" ddb-reprint="{$reprint}" hgv="{$hgv}" tm="{replace($hgv, '[^\d]+', '')}"/>
             </xsl:for-each>
           </xsl:for-each>
