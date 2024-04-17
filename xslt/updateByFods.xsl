@@ -24,8 +24,8 @@
   <xsl:strip-space elements="tei:p" />
   <xsl:preserve-space elements="tei:div tei:revisionDesc" />
 
-  <xsl:param name="TABLE_NAME" select="'province'"/>
-  <xsl:param name="HEADER_KEY" select="'province'"/>
+  <xsl:param name="TABLE_NAME" select="'TM to MP3'"/>
+  <xsl:param name="HEADER_KEY" select="'TM'"/>
   <xsl:param name="HEADER_LINE" select="1"/>
   <xsl:param name="DATA_LINE" select="2"/>
   <xsl:param name="IDP_DATA_READ" select="'../idp.data/papyri/master'"/>
@@ -51,17 +51,17 @@
         <xsl:with-param name="headerKey" select="$HEADER_KEY"/>
       </xsl:call-template>
     </xsl:variable>
-    <!--xsl:message select="$fods"></xsl:message-->
-    
+    <xsl:message select="$fods"></xsl:message>
+
     <!--xsl:for-each select="collection(concat($IDP_DATA_READ, '/HGV_meta_EpiDoc/?select=*.xml;recurse=yes'))[.//tei:placeName[@subtype = 'nome'][string(.) = ('Antaiopolites', 'Antinoites', 'Aphroditopolites', 'Apollonopolites', 'Apollonopolites Heptakomias', 'Arsinoites', 'Athribites', 'Busirites', 'Eileithyiopolites', 'Fayūm', 'Heliopolites', 'Herakleopolites', 'Hermonthites', 'Hermopolites', 'Kabasites', 'Koptites', 'Kussites', 'Kynopolites', 'Latopolites', 'Leontopolites', 'Letopolites', 'Lykopolites', 'Memphites', 'Mendesios', 'Oasis Magna', 'Oxyrhynchites', 'Panopolites', 'Pathyrites', 'Pharbaithites', 'Prosopites', 'Theben', 'Theodosiopolites', 'Thinites')]]"-->
-    <xsl:for-each select="collection(concat($IDP_DATA_READ, '/HGV_meta_EpiDoc/?select=*.xml;recurse=yes'))[.//tei:placeName[@subtype = 'nome'][string(.) = ('Bubastites, Delta', 'Gynaikopolites', 'Menelaites', 'Metelites', 'Onuphites', 'Saites', 'Sebennytes', 'Sethroites', 'Tanites', 'Tentyrites')]]">
+    <!--xsl:for-each select="collection(concat($IDP_DATA_READ, '/HGV_meta_EpiDoc/?select=*.xml;recurse=yes'))[.//tei:placeName[@subtype = 'nome'][string(.) = ('Bubastites, Delta', 'Gynaikopolites', 'Menelaites', 'Metelites', 'Onuphites', 'Saites', 'Sebennytes', 'Sethroites', 'Tanites', 'Tentyrites')]]">
       <xsl:message select="concat('____ ', string-join(.//tei:idno[@type='ddb-hybrid'], ', '), ' (', string-join(.//tei:placeName[@subtype = 'nome'], '|'),')')"/>
       <xsl:result-document href="{replace(base-uri(.), 'master', 'xwalk')}" method="xml" media-type="text/xml" indent="yes">
         <xsl:apply-templates mode="copy">
           <xsl:with-param name="data" select="$fods"></xsl:with-param>
         </xsl:apply-templates>
       </xsl:result-document>
-    </xsl:for-each>
+    </xsl:for-each-->
     <!--
       'Antaiopolites', 'Antinoites', 'Aphroditopolites', 'Apollonopolites', 'Apollonopolites Heptakomias', 'Arsinoites', 'Athribites', 'Busirites', 'Eileithyiopolites', 'Fayūm', 'Heliopolites', 'Herakleopolites', 'Hermonthites', 'Hermopolites', 'Kabasites', 'Koptites', 'Kussites', 'Kynopolites', 'Latopolites', 'Leontopolites', 'Letopolites', 'Lykopolites', 'Memphites', 'Mendesios', 'Oasis Magna', 'Oxyrhynchites', 'Panopolites', 'Pathyrites', 'Pharbaithites', 'Prosopites', 'Theben', 'Theodosiopolites', 'Thinites'
       'Bubastites, Delta', 'Gynaikopolites', 'Menelaites', 'Metelites', 'Onuphites', 'Saites', 'Sebennytes', 'Sethroites', 'Tanites', 'Tentyrites'
