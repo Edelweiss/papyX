@@ -19,11 +19,11 @@
     <xsl:param name="IDP-DATA_READ"  select="'../idp.data/papyri/master'"/>
     <xsl:param name="IDP-DATA_WRITE" select="'../idp.data/papyri/xwalk'"/>
     <xsl:param name="DATA_FILE" select="'../data/imageUrls.fods'" as="xs:string"/>
-    <xsl:param name="TABLE" select="'update image urls'" as="xs:string"/>
+    <xsl:param name="TABLE" select="'images'" as="xs:string"/>
     <xsl:param name="ID_COLUMN" select="1" as="xs:integer"/>
     <xsl:param name="URL_COLUMN" select="2" as="xs:integer"/>
     <xsl:param name="IDENTIFIER" select="'HGV'" as="xs:string"/><!--HGV, TM or DDB -->
-    <xsl:param name="HEADER" select="0" as="xs:integer"/><!-- number of header lines in the input document -->
+    <xsl:param name="HEADER" select="1" as="xs:integer"/><!-- number of header lines in the input document -->
     <xsl:param name="KILL_URL" select="'ALL_FIGURE_GRAPHIC_URLS_CONTAINING_THIS_STRING_WILL_BE_DROPPED_DURING_ID_TRANSFORMATION'"/>
 
     <xsl:variable name="IMAGE_URLS" select="doc($DATA_FILE)"/>
