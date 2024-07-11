@@ -16,11 +16,11 @@
 
     REPRINTS
     1.) reprint information sammeln
-    java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/REPRINT.xml -it:REPRINT -xsl:xslt/009_getInfoFromEpiDoc.xsl > 009_getInfoFromEpiDoc 2>&1
+    java -Xms1024m -Xmx2048m net.sf.saxon.Transform -o:data/REPRINT.xml -it:COLLECT_REPRINTS -xsl:xslt/getInfoFromEpiDoc.xsl > getInfoFromEpiDoc 2>&1
     2.) reprint information in Graphen gruppieren
-    java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/REPRINT_CLUSTER.xml -s:data/REPRINT.xml -it:CLUSTER_REPRINTS -xsl:xslt/009_getInfoFromEpiDoc.xsl > 009_getInfoFromEpiDoc 2>&1
+    java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/REPRINT_CLUSTER.xml -s:data/REPRINT.xml -it:CLUSTER_REPRINTS -xsl:xslt/getInfoFromEpiDoc.xsl > getInfoFromEpiDoc 2>&1
     3.) Graphen für graphviz aufbereiten und einzelne Dateien rausschreiben und ein Gesamt HTML erzeugen
-    java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/REPRINT_GRAPHVIZ.xml -s:data/REPRINT_CLUSTER.xml -it:GRAPHVIZ -xsl:xslt/009_getInfoFromEpiDoc.xsl > 009_getInfoFromEpiDoc 2>&1
+    java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/REPRINT_GRAPHVIZ.xml -s:data/REPRINT_CLUSTER.xml -it:GRAPHVIZ -xsl:xslt/getInfoFromEpiDoc.xsl > getInfoFromEpiDoc 2>&1
     4.) SVGs erstellen (dot -Tsvg test.gv -o test.svg)
     find data/reprint/ -name "*.gv" -type f -exec dot -Tsvg '{}' -o '{}'.svg ";"
 
@@ -45,9 +45,9 @@
       <!--xsl:call-template name="DDB_COLLECTION_NAME"/-->
     </xsl:template>
 
-    <xsl:template name="REPRINT">
+    <xsl:template name="COLLECT_REPRINTS">
       <list>
-        <xsl:for-each select="collection(concat('../idp.data/papyri/xwalk/DDB_EpiDoc_XML', '?select=*.xml;recurse=yes'))//tei:head/tei:ref[@type = ('reprint-in', 'reprint-from')]">
+        <xsl:for-each select="collection(concat('../idp.data/papyri/xwalk/DDB_EpiDoc_XML', '?select=*.xml;recurse=yes'))[//tei:head/tei:ref[@type = ('reprint-in', 'reprint-from')]]">
             <xsl:variable name="ddb" select="//tei:idno[@type = 'ddb-hybrid']"/>
             <xsl:variable name="hgv" select="//tei:idno[@type = 'HGV']"/>
             <item ddb="{$ddb}" hgv="{$hgv}">
@@ -79,7 +79,11 @@
           <xsl:for-each select="//tei:item[not(tei:reprint[@type = 'from'])]">
               <xsl:variable name="cluster_start">
                 <list>
-                  <xsl:copy-of select="."/>
+                  <xsl:copy>
+                    <xsl:copy-of select="@ddb|@hgv"/>
+                      <xsl:attribute name="mark" select="'loose_end'"/>
+                    <xsl:copy-of select="./node()"/>
+                  </xsl:copy>
                 </list>
               </xsl:variable>
               <xsl:message select="concat(position(), ': ____ ', @ddb)"/>
@@ -95,7 +99,7 @@
         <head>
           <meta http-equiv="Content-Type" content="text/html" charset="UTF-8"/>
           <title>Reprints</title>
-          <!-- based off of https://www.cs.tut.fi/~jkorpela/www/testel.html, with additions of newer features -->
+          <!-- based off of https://www.cs.tut.fi/~jkorpela/www/testel.html, with additions of newer features --> 
         </head>
         <body>
           <ul>
@@ -194,28 +198,47 @@
     <xsl:function name="papy:cluster_r">
       <xsl:param name="list_cluster"/>
       <xsl:param name="list_complete"/>
-      <xsl:variable name="current_chain_link" select="$list_cluster//tei:item[position() = last()]"/>
+      <xsl:variable name="loose_ends" select="$list_cluster//tei:item[@mark='loose_end']"/>
+      
+      <xsl:message select="$loose_ends"></xsl:message>
+      
       <xsl:choose>
         <xsl:when test="count($list_cluster//tei:item) &gt; 30"><!-- terminate -->
           <list count="31" terminate="safety_net">
             <xsl:copy-of select="$list_cluster//tei:item"/>
           </list>
         </xsl:when>
-        <xsl:when test="$current_chain_link[not(tei:reprint[@type = 'in'])]"><!-- terminate -->
+        <xsl:when test="not($loose_ends)"><!-- terminate -->
           <list count="{count($list_cluster//tei:item)}" terminate="reached_end">
             <xsl:copy-of select="$list_cluster//tei:item"/>
           </list>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:variable name="next_chain_link" select="$list_complete//tei:item[@ddb = ($current_chain_link/tei:reprint[@type='in'])[1]/@ddb]"/>
+          <xsl:variable name="next_chain_links" select="$list_complete//tei:item[@ddb = $loose_ends//tei:reprint[@type='in']/@ddb]"/>
           <xsl:choose>
-            <xsl:when test="$next_chain_link">
+            <xsl:when test="$next_chain_links">
               <xsl:variable name="new_list_cluster">
                 <list>
-                  <xsl:copy-of select="$list_cluster//tei:item"/>
-                  <xsl:copy-of select="$next_chain_link"/>
+                  <xsl:for-each select="$list_cluster//tei:item">
+                    <xsl:copy>
+                      <xsl:copy-of select="@ddb|@hgv"/>
+                      <xsl:copy-of select="./node()"/>
+                    </xsl:copy>
+                  </xsl:for-each>
+                  <xsl:for-each select="$next_chain_links">
+                    <xsl:if test="not(@ddb = $list_cluster//tei:item/@ddb)">
+                      <xsl:copy>
+                        <xsl:copy-of select="@ddb|@hgv"/>
+                        <xsl:if test="tei:reprint[@type='in']">
+                          <xsl:attribute name="mark" select="'loose_end'"/>
+                        </xsl:if>
+                        <xsl:copy-of select="./node()"/>
+                      </xsl:copy>
+                    </xsl:if>
+                  </xsl:for-each>
                 </list>
               </xsl:variable>
+              <xsl:message select="$new_list_cluster"></xsl:message>
               <xsl:copy-of select="papy:cluster_r($new_list_cluster, $list_complete)"/>
             </xsl:when>
             <xsl:otherwise>
