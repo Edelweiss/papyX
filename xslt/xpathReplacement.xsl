@@ -130,7 +130,50 @@ node()[preceding-sibling::lb[@n='16']][following-sibling::lb[@n='17']]
 
     <xsl:template match="@*|node()" mode="replace">
         <xsl:param name="data"/>
-        <xsl:variable name="containerXpath" select="replace(substring-before(substring-after($data/tei:item[1]/tei:ref/@target, '#'), '/node()'), '/([^/])', '/tei:$1')" />
+        <xsl:variable name="currentNode" select="."/>
+        <xsl:variable name="currentRoot" select="/"/>
+        <xsl:variable name="checkCurrentNode">
+            <check>
+            <xsl:for-each select="$data/tei:item">
+                <xsl:variable name="containerXpath" select="replace(substring-before(substring-after(tei:ref/@target, '#'), '/node()'), '/([^/])', '/tei:$1')" />
+                <xsl:variable name="start_loco_lb_number" select="replace(tei:ref/@target, '^.+preceding-sibling::lb\[@n=[^d](\d+)[^d]\].+$', '$1')" />
+                <xsl:variable name="stop_bumper_lb_number" select="replace(tei:ref/@target, '^.+following-sibling::lb\[@n=[^d](\d+)[^d]\].+$', '$1')" />
+                <xsl:variable name="in_container">
+                    <xsl:variable name="containerFromFile">
+                        <xsl:evaluate xpath="$containerXpath" context-item="$currentRoot"/>
+                    </xsl:variable>
+                    <xsl:choose>
+                        <xsl:when test="$containerFromFile = $currentNode/.."><xsl:value-of select="true()"/></xsl:when>
+                        <xsl:otherwise><xsl:value-of select="false()"/></xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:choose>
+                    <xsl:when test="$in_container and $currentNode/preceding-sibling::tei:lb[@n=$start_loco_lb_number] and $currentNode/following-sibling::tei:lb[@n=$stop_bumper_lb_number]">
+                        <delete/>
+                    </xsl:when>
+                    <xsl:when test="$in_container and local-name($currentNode) = 'lb' and $currentNode/@n = $start_loco_lb_number">
+                        <xsl:copy-of select="tei:p[@change='replacement']"></xsl:copy-of>
+                    </xsl:when>
+                </xsl:choose>
+            </xsl:for-each>
+            </check>
+        </xsl:variable>
+
+        <xsl:choose>
+            <xsl:when test="$checkCurrentNode//tei:p[@change='replacement']">
+                <xsl:copy-of select="$checkCurrentNode//tei:p[@change='replacement']/node()"/>
+            </xsl:when>
+            <xsl:when test="$checkCurrentNode//tei:delete"/>
+            <xsl:otherwise>
+                <xsl:copy>
+                    <xsl:apply-templates select="@*|node()" mode="replace">
+                        <xsl:with-param name="data" select="$data"/>
+                    </xsl:apply-templates>
+                </xsl:copy>
+            </xsl:otherwise>
+        </xsl:choose>
+
+        <!--xsl:variable name="containerXpath" select="replace(substring-before(substring-after($data/tei:item[1]/tei:ref/@target, '#'), '/node()'), '/([^/])', '/tei:$1')" />
         <xsl:variable name="start_loco_lb_number" select="replace($data/tei:item[1]/tei:ref/@target, '^.+preceding-sibling::lb\[@n=[^d](\d+)[^d]\].+$', '$1')" />
         <xsl:variable name="stop_bumper_lb_number" select="replace($data/tei:item[1]/tei:ref/@target, '^.+following-sibling::lb\[@n=[^d](\d+)[^d]\].+$', '$1')" />
 
@@ -155,7 +198,7 @@ node()[preceding-sibling::lb[@n='16']][following-sibling::lb[@n='17']]
                 <xsl:message select="$stop_bumper_lb_number"/>
                 <xsl:message select="$in_container"/>
             </xsl:when>
-            <xsl:when test="$in_container and name(.) = 'lb' and @n = $start_loco_lb_number">
+            <xsl:when test="$in_container and local-name(.) = 'lb' and @n = $start_loco_lb_number">
                 <xsl:message select="'+ + + + + +'"/>
                 <xsl:message select="$containerXpath"/>
                 <xsl:message select="$start_loco_lb_number"/>
@@ -170,7 +213,7 @@ node()[preceding-sibling::lb[@n='16']][following-sibling::lb[@n='17']]
                     </xsl:apply-templates>
                 </xsl:copy>
             </xsl:otherwise>
-        </xsl:choose>
+        </xsl:choose-->
     </xsl:template>
 
 </xsl:stylesheet>
