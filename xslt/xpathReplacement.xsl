@@ -25,8 +25,7 @@ node()[preceding-sibling::lb[@n='16']][following-sibling::lb[@n='17']]
     export CLASSPATH=$CLASSPATH:/Users/elemmire/tools/SaxonHE9-8-0-12J/saxon9he.jar
     neu
     export CLASSPATH=$CLASSPATH:/Users/elemmire/tools/SaxonHE12-5J/saxon-he-12.5.jar
-    
-    
+
     XSL:EVALUATE
     
     https://www.w3.org/TR/xslt-30/#element-evaluate
@@ -36,7 +35,7 @@ node()[preceding-sibling::lb[@n='16']][following-sibling::lb[@n='17']]
     siehe auch
     fn:transform()
     
-    weitere Divs zur Verwirrung enstreuen:
+    weitere Divs zur Verwirrung einstreuen:
     
     <div type="textpart"><lb n="9999"/><ab>TEST</ab></div>
     -->
@@ -46,7 +45,7 @@ node()[preceding-sibling::lb[@n='16']][following-sibling::lb[@n='17']]
 
     <xsl:param name="IDP-DATA_READ"  select="'../idp.data/papyri/master'"/>
     <xsl:param name="IDP-DATA_WRITE" select="'../idp.data/papyri/xwalk'"/>
-    <xsl:param name="EDITORIAL" select="doc('../data/editorial.xml')"/>
+    <xsl:param name="EDITORIAL" select="doc('../data/editorial2.xml')"/>
     
     <xsl:template name="APPLY_CHANGES">
         <xsl:call-template name="papy:csvLine">
