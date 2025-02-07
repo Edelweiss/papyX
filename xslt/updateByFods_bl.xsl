@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsl:stylesheet exclude-result-prefixes="#all" version="3.0"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:papy="Papyrillio"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:date="http://exslt.org/dates-and-times"
+    xmlns:fm="http://www.filemaker.com/fmpxmlresult"
+    xmlns:tei="http://www.tei-c.org/ns/1.0"
+    xmlns:fn="http://www.xsltfunctions.com/"
+    xmlns:functx="http://www.functx.com"
+    xmlns="http://www.tei-c.org/ns/1.0"
+    xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0">
+  <!--
+
+    java -Xms512m -Xmx1536m net.sf.saxon.Transform -s:data/bl.fods -o:data/bl.xml -it:FODS -xsl:xslt/updateByFods_bl.xsl TABLE_NAME=papyX HEADER_KEY=HGV
+
+  -->
+
+  <xsl:output method="xml" media-type="text/xml" />
+  <xsl:include href="helper.xsl" />
+  <xsl:strip-space elements="tei:p" />
+  <xsl:preserve-space elements="tei:div tei:revisionDesc" />
+
+  <xsl:param name="TABLE_NAME" select="'papyX'"/>
+  <xsl:param name="HEADER_KEY" select="'HGV'"/>
+  <xsl:param name="HEADER_LINE" select="1"/>
+  <xsl:param name="DATA_LINE" select="2"/>
+  <xsl:param name="IDP_DATA_READ" select="'../idp.data/papyri/master'"/>
+  <xsl:param name="IDP_DATA_WRITE" select="'../idp.data/papyri/xwalk'"/>
+
+  <xsl:template name="FODS">
+    <xsl:variable name="fods">
+      <xsl:call-template name="papy:fodsIndexData">
+        <xsl:with-param name="fodsDocument" select="."/>
+        <xsl:with-param name="tableName" select="$TABLE_NAME"/>
+        <xsl:with-param name="dataLine" select="$DATA_LINE"/>
+        <xsl:with-param name="headerKey" select="$HEADER_KEY"/>
+      </xsl:call-template>
+    </xsl:variable>
+    <!--xsl:message select="$fods"></xsl:message-->
+
+    <xsl:for-each-group select="$fods//tei:row" group-by="tei:cell[@name='HGV']">
+      <xsl:variable name="hgv" select="current-grouping-key()" />
+      <xsl:variable name="file" select="concat($IDP_DATA_READ, '/', papy:hgvFilePath($hgv))" />
+      <xsl:variable name="epidoc" select="doc($file)" />
+      <xsl:message select="concat($hgv, ' - ', $epidoc//tei:idno[@type='ddb-hybrid'])"></xsl:message>
+
+      <xsl:result-document href="{replace($file, 'master', 'xwalk')}" method="xml" media-type="text/xml" indent="yes">
+        <xsl:apply-templates mode="copy">
+          <xsl:with-param name="data" select="current-group()"/>
+        </xsl:apply-templates>
+      </xsl:result-document>
+
+    </xsl:for-each-group>
+  </xsl:template>
+
+</xsl:stylesheet>
