@@ -97,7 +97,9 @@
         <xsl:variable name="tm" select="string(.//tei:idno[@type='TM'])"/>
         <xsl:if test="not($hgvBased//tei:item[@dclp = $dclp]) and not($ddbBased//tei:item[@dclp = $dclp])">
           <!--xsl:message select="concat('____', $dclp, ' / ', $tm)"/-->
-          <item dclp="{$dclp}" tm="{$tm}"/>
+          <xsl:if test="$dclp and string-length($dclp) &lt; 32">
+            <item dclp="{$dclp}" tm="{$tm}"/>
+          </xsl:if>
         </xsl:if>
       </xsl:for-each>
     </list>
@@ -119,13 +121,13 @@
             <xsl:if test="number($tm) &lt; 500000 or number($tm) &gt; 500100">
               <xsl:variable name="dclpFile" select="concat($idp.data, '/DCLP/', ceiling(number($tm) div 1000), '/', $tm, '.xml')"/>
               <xsl:variable name="dclpEpiDoc" select="if(doc-available($dclpFile))then(doc($dclpFile))else()"/>
-              <xsl:variable name="dclp" select="if($dclpEpiDoc)then(string($dclpEpiDoc//tei:publicationStmt/tei:idno[@type = 'dclp-hybrid']))else()"/>
+              <xsl:variable name="dclp" select="if($dclpEpiDoc)then(string($dclpEpiDoc//tei:publicationStmt/tei:idno[@type = 'dclp-hybrid'][1]))else()"/>
 
               <xsl:for-each select="$ddbList">
                 <xsl:variable name="ddb" select="string(.)"/>
                 <!-- xsl:message select="concat('____', $collection, '____', string-join(($ddb, $hgv, $tm, $dclp), ' / '))"/-->
                 <item ddb="{$ddb}" hgv="{$hgv}" tm="{$tm}">
-                  <xsl:if test="$dclp">
+                  <xsl:if test="$dclp and string-length($dclp) &lt; 32">
                     <xsl:attribute name="dclp" select="$dclp"/>
                   </xsl:if>
                 </item>

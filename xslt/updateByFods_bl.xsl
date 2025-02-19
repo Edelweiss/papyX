@@ -47,12 +47,39 @@
       <xsl:message select="concat($hgv, ' - ', $epidoc//tei:idno[@type='ddb-hybrid'])"></xsl:message>
 
       <xsl:result-document href="{replace($file, 'master', 'xwalk')}" method="xml" media-type="text/xml" indent="yes">
-        <xsl:apply-templates mode="copy">
-          <xsl:with-param name="data" select="current-group()"/>
+        <xsl:apply-templates select="$epidoc" mode="copy">
+          <xsl:with-param name="data">
+            <table>
+              <xsl:copy-of  select="current-group()"/>
+            </table>
+          </xsl:with-param>
         </xsl:apply-templates>
       </xsl:result-document>
 
     </xsl:for-each-group>
+  </xsl:template>
+
+  <xsl:template match="tei:div[@type='bibliography'][@subtype='corrections']" mode="copy"/>
+  <xsl:template match="tei:body/tei:div[position() = last()]" mode="copy">
+    <xsl:param name="data"/>
+    <xsl:copy-of select="."/>
+    <div type="bibliography" subtype="corrections">
+      <head>BL-Einträge nach BL-Konkordanz</head>
+      <listBibl>
+        <bibl type="BL-online">
+          <ptr target="https://beehive.zaw.uni-heidelberg.de/hgv/{ $data//tei:row[1]/tei:cell[@name='HGV'] }"/>
+        </bibl>
+        <xsl:for-each select="$data//tei:row">
+          <bibl type="BL">
+            <biblScope type="volume"><xsl:value-of select="substring-after(tei:cell[@name='BL'], ' ')"/></biblScope>
+            <xsl:variable name="page" select="normalize-space(tei:cell[@name='page'])"/>
+            <xsl:if test="$page != '0'">
+              <biblScope type="pages"><xsl:value-of select="$page"/></biblScope>
+            </xsl:if>
+          </bibl>
+        </xsl:for-each>
+      </listBibl>
+    </div>
   </xsl:template>
 
 </xsl:stylesheet>
