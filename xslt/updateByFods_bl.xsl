@@ -13,6 +13,13 @@
     xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0">
   <!--
 
+Daten von beehive für data/bl.fods
+
+SELECT r.hgv, comp.short, c.compilationPage FROM
+register r JOIN correction_register cr ON cr.register_id = r.id JOIN correction c ON cr.correction_id = c.id JOIN compilation comp ON c.compilation_id = comp.id
+GROUP BY r.hgv, comp.short, c.compilationPage
+ORDER BY comp.volume, c.sort LIMIT 1000
+
     java -Xms512m -Xmx1536m net.sf.saxon.Transform -s:data/bl.fods -o:data/bl.xml -it:FODS -xsl:xslt/updateByFods_bl.xsl TABLE_NAME=papyX HEADER_KEY=HGV
 
   -->
