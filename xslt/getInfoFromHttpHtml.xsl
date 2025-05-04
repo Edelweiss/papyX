@@ -13,7 +13,7 @@
     xmlns="http://www.tei-c.org/ns/1.0"
     >
     <!--
-        java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/007_image_urls.xml -it:GET_INFO  -xsl:xslt/getInfoFromHttpHtml.xsl > new_apis.csv 2>&1
+        java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/007_image_urls.xml -it:GET_INFO  -xsl:xslt/getInfoFromHttpHtml.xsl START=135 STOP=270 > new_apis.csv 2>&1
     -->
 
     <xsl:include href="helper.xsl"/>
@@ -22,6 +22,8 @@
 
     <xsl:param name="IDP-DATA_READ"  select="'../idp.data/papyri/master'"/>
     <xsl:param name="IDP-DATA_WRITE" select="'../idp.data/papyri/xwalk'"/>
+    <xsl:param name="START" select="135"/>
+    <xsl:param name="STOP" select="270"/>
     <xsl:variable name="HARVEST_MOON" select="(
     'https://digicoll.lib.berkeley.edu/search?ln=en&amp;p=apis1_1',
 'https://digicoll.lib.berkeley.edu/search?ln=en&amp;p=apis1_10',
@@ -1202,25 +1204,27 @@
     <xsl:template name="GET_INFO">
         <list>
             <xsl:for-each select="$HARVEST_MOON">
-                <xsl:variable name="apis" select="replace(., '^http.+p=', '')"/>
-                <!--xsl:message select="concat($apis, ' - - - - - ', .)"></xsl:message-->
-                <xsl:variable name="records">
-                    <list>
-                        <xsl:analyze-string select="unparsed-text(.)" regex="/record/\d+">
-                            <xsl:matching-substring>
-                                <item><xsl:value-of select="."/></item>
-                            </xsl:matching-substring>
-                        </xsl:analyze-string>
-                    </list>
-                </xsl:variable>
-                <xsl:variable name="recordsUnique">
-                    <list>
-                        <xsl:for-each-group select="$records//tei:item" group-by="string(.)">
-                            <item><xsl:value-of select="concat('https://digicoll.lib.berkeley.edu', current-grouping-key())"/></item>
-                        </xsl:for-each-group>
-                    </list>
-                </xsl:variable>
-                <xsl:message select="concat($apis, ',', count($recordsUnique//tei:item), ',', string-join($recordsUnique//tei:item, '|'))"/>
+                <xsl:if test="position() &gt;= $START and position() &lt;= $STOP">
+                    <xsl:variable name="apis" select="replace(., '^http.+p=', '')"/>
+                    <!--xsl:message select="concat($apis, ' - - - - - ', .)"></xsl:message-->
+                    <xsl:variable name="records">
+                        <list>
+                            <xsl:analyze-string select="unparsed-text(.)" regex="/record/\d+">
+                                <xsl:matching-substring>
+                                    <item><xsl:value-of select="."/></item>
+                                </xsl:matching-substring>
+                            </xsl:analyze-string>
+                        </list>
+                    </xsl:variable>
+                    <xsl:variable name="recordsUnique">
+                        <list>
+                            <xsl:for-each-group select="$records//tei:item" group-by="string(.)">
+                                <item><xsl:value-of select="concat('https://digicoll.lib.berkeley.edu', current-grouping-key())"/></item>
+                            </xsl:for-each-group>
+                        </list>
+                    </xsl:variable>
+                    <xsl:message select="concat($apis, ',', count($recordsUnique//tei:item), ',', string-join($recordsUnique//tei:item, '|'))"/>
+                </xsl:if>
             </xsl:for-each>
         </list>
     </xsl:template>
