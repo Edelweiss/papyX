@@ -22,17 +22,15 @@
 
     <xsl:param name="IDP-DATA_READ"  select="'../idp.data/papyri/master'"/>
     <xsl:param name="IDP-DATA_WRITE" select="'../idp.data/papyri/xwalk'"/>
-    <xsl:variable name="HARVEST_MOON">
-        <list>
-            <item>https://digicoll.lib.berkeley.edu/search?ln=en&amp;p=apis1_1</item>
-            <item>https://digicoll.lib.berkeley.edu/search?ln=en&amp;p=apis1_11512</item>
-            <item>https://digicoll.lib.berkeley.edu/search?ln=en&amp;p=apis1_1154</item>
-        </list>
-    </xsl:variable>
+    <xsl:variable name="HARVEST_MOON" select="(
+    'https://digicoll.lib.berkeley.edu/search?ln=en&amp;p=apis1_1',
+    'https://digicoll.lib.berkeley.edu/search?ln=en&amp;p=apis1_11512',
+    'https://digicoll.lib.berkeley.edu/search?ln=en&amp;p=apis1_1154'
+    )"/>
 
     <xsl:template name="GET_INFO">
         <list>
-            <xsl:for-each select="$HARVEST_MOON//tei:item/string(.)">
+            <xsl:for-each select="$HARVEST_MOON">
                 <xsl:variable name="apis" select="replace(., '^http.+p=', '')"/>
                 <!--xsl:message select="concat($apis, ' - - - - - ', .)"></xsl:message-->
                 <xsl:variable name="records">
