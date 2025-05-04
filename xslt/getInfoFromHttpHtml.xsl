@@ -34,12 +34,24 @@
         <list>
             <xsl:for-each select="$HARVEST_MOON//tei:item/string(.)">
                 <xsl:variable name="apis" select="replace(., '^http.+p=', '')"/>
-                <xsl:message select="concat($apis, ' - - - - - ', .)"></xsl:message>
-                <xsl:analyze-string select="unparsed-text(.)" regex="/record/\d+">
-                    <xsl:matching-substring>
-                        <xsl:message select="."></xsl:message>
-                    </xsl:matching-substring>
-                </xsl:analyze-string>
+                <!--xsl:message select="concat($apis, ' - - - - - ', .)"></xsl:message-->
+                <xsl:variable name="records">
+                    <list>
+                        <xsl:analyze-string select="unparsed-text(.)" regex="/record/\d+">
+                            <xsl:matching-substring>
+                                <item><xsl:value-of select="."/></item>
+                            </xsl:matching-substring>
+                        </xsl:analyze-string>
+                    </list>
+                </xsl:variable>
+                <xsl:variable name="recordsUnique">
+                    <list>
+                        <xsl:for-each-group select="$records//tei:item" group-by="string(.)">
+                            <item><xsl:value-of select="concat('https://digicoll.lib.berkeley.edu', current-grouping-key())"/></item>
+                        </xsl:for-each-group>
+                    </list>
+                </xsl:variable>
+                <xsl:message select="concat($apis, ',', count($recordsUnique//tei:item), ',', string-join($recordsUnique//tei:item, '|'))"/>
             </xsl:for-each>
         </list>
     </xsl:template>
