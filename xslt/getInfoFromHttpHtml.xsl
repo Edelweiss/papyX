@@ -14,6 +14,8 @@
     >
     <!--
         java -Xms512m -Xmx1536m net.sf.saxon.Transform -o:data/007_image_urls.xml -it:GET_INFO  -xsl:xslt/getInfoFromHttpHtml.xsl START=135 STOP=270 > new_apis.csv 2>&1
+
+        https://docs.google.com/spreadsheets/d/1-sGYboZU4CAkCjo-atJDTc0-WhtniwZaRhw3m9EmkrI/edit?gid=1332196560#gid=1332196560
     -->
 
     <xsl:include href="helper.xsl"/>
