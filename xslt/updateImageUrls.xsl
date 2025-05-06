@@ -122,7 +122,8 @@
     </xsl:template>
 
     <!-- HGV -->
-    <xsl:template match="tei:div[@type='figure']/tei:p[not(tei:figure[not(contains(tei:graphic/@url, $KILL_URL))])]" mode="copy"/><!-- delete empty -->
+    <xsl:template match="tei:div[@type='figure'][not(tei:p/tei:figure[not(contains(tei:graphic/@url, $KILL_URL))])]" mode="copy"/><!-- delete empty -->
+    <xsl:template match="text()[preceding-sibling::tei:div[@type='figure'][not(tei:p/tei:figure[not(contains(tei:graphic/@url, $KILL_URL))])]]" mode="copy"/><!-- delete trailing whitespace after deleted div -->
 
     <xsl:template match="tei:div[@type='figure']/tei:p[tei:figure[not(contains(tei:graphic/@url, $KILL_URL))]]" mode="copy">
         <xsl:copy>
@@ -131,7 +132,7 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="tei:body[not(tei:div[@type='figure'])]" mode="copy">
+    <xsl:template match="(tei:body[not(tei:div[@type='figure'])]|tei:body[tei:div[@type='figure'][not(tei:p/tei:figure[not(contains(tei:graphic/@url, $KILL_URL))])]])" mode="copy">
         <xsl:copy>
             <xsl:apply-templates select="@*|node()" mode="copy"/>
             <div type="figure">
@@ -148,22 +149,27 @@
         <xsl:variable name="urlList" select="$IMAGE_URLS//table:table[@table:name=$TABLE]/table:table-row[normalize-space(table:table-cell[$ID_COLUMN]) = $id]"/>
         <xsl:for-each select="$urlList">
             <xsl:variable name="url" select="normalize-space(table:table-cell[$URL_COLUMN])"/>
-            <xsl:choose>
-                <xsl:when test="not($url = $oldList)">
-                    <xsl:message select="concat($url, ' NEW')"/>
-                    <figure>
-                        <graphic url="{$url}"/>
-                    </figure>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:message select="concat($url, ' ALREADY EXISTS')"/>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:for-each select="tokenize($url, ',')">
+                <xsl:variable name="url" select="normalize-space(.)"/>
+                <xsl:choose>
+                    <xsl:when test="not($url = $oldList)">
+                        <xsl:message select="concat($url, ' NEW')"/>
+                        <figure>
+                            <graphic url="{$url}"/>
+                        </figure>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:message select="concat($url, ' ALREADY EXISTS')"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:for-each>
+
         </xsl:for-each>
     </xsl:template>
 
     <!-- DCLP -->
-    <xsl:template match="tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl[not(tei:bibl[@type='printed']|tei:bibl[@type='online'][not(contains(tei:ptr/@target, $KILL_URL))])]" mode="copy_dclp"/><!-- delete empty -->
+    <xsl:template match="tei:div[@type='bibliography'][@subtype='illustrations'][tei:listBibl/not(tei:bibl[@type='printed']|tei:bibl[@type='online'][not(contains(tei:ptr/@target, $KILL_URL))])]" mode="copy_dclp"/><!-- delete empty -->
+    <xsl:template match="text()[preceding-sibling::tei:div[@type='bibliography'][@subtype='illustrations'][tei:listBibl/not(tei:bibl[@type='printed']|tei:bibl[@type='online'][not(contains(tei:ptr/@target, $KILL_URL))])]]" mode="copy_dclp"/><!-- trailing whitespace -->
 
     <xsl:template match="tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl[tei:bibl[@type='printed']|tei:bibl[@type='online'][not(contains(tei:ptr/@target, $KILL_URL))]]" mode="copy_dclp">
         <xsl:copy>
@@ -173,7 +179,7 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="tei:body[not(tei:div[@type='bibliography'][@subtype='illustrations'])]" mode="copy_dclp">
+    <xsl:template match="tei:body[not(tei:div[@type='bibliography'][@subtype='illustrations'])]|tei:body[tei:div[@type='bibliography'][@subtype='illustrations'][tei:listBibl/not(tei:bibl[@type='printed']|tei:bibl[@type='online'][not(contains(tei:ptr/@target, $KILL_URL))])]]" mode="copy_dclp">
         <xsl:copy>
             <xsl:apply-templates select="@*|node()" mode="copy_dclp"/>
             <div type="bibliography" subtype="illustrations">
@@ -191,17 +197,20 @@
         <xsl:variable name="urlList" select="$IMAGE_URLS//table:table[@table:name=$TABLE]/table:table-row[normalize-space(table:table-cell[$ID_COLUMN]) = $id]"/>
         <xsl:for-each select="$urlList">
             <xsl:variable name="url" select="normalize-space(table:table-cell[$URL_COLUMN])"/>
-            <xsl:choose>
-                <xsl:when test="not($url = $oldList)">
-                    <xsl:message select="concat($url, ' ', 'NEW')"/>
-                    <bibl type="online">
-                        <ptr target="{$url}"/>
-                    </bibl>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:message select="concat($url, ' ', 'OLD')"/>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:for-each select="tokenize($url, ',')">
+                <xsl:variable name="url" select="normalize-space(.)"/>
+                <xsl:choose>
+                    <xsl:when test="not($url = $oldList)">
+                        <xsl:message select="concat($url, ' ', 'NEW')"/>
+                        <bibl type="online">
+                            <ptr target="{$url}"/>
+                        </bibl>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:message select="concat($url, ' ', 'OLD')"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:for-each>
         </xsl:for-each>
     </xsl:template>
 
