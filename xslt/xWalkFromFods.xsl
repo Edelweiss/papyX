@@ -17,6 +17,7 @@
 
     xwalk
         java -Xms512m -Xmx1536m net.sf.saxon.Transform -s:data/oKrok_Claud_Images.fods -o:data/louvreImages.xml -it:ADD_IMAGES -xsl:xslt/xWalkFromFods.xsl
+        java -Xms512m -Xmx1536m net.sf.saxon.Transform -s:data/oOntMus_collection.fods -o:data/oOntMus_coll.xml -it:ADD_COLLECTION -xsl:xslt/xWalkFromFods.xsl
 
     Lookup-Formel für Goolge Sheets
         =ARRAYFORMULA(IFNA(VLOOKUP(B2:B,xWalk!$A$1:$A,1,false),""))
@@ -25,9 +26,9 @@
   <xsl:output method="xml" media-type="text/xml" />
   <xsl:include href="helper.xsl" />
 
-  <xsl:param name="TABLE_NAME" select="'4berangere'"/>
-  <xsl:param name="IMAGE_KEY" select="'Louvre image link'"/>
-  <xsl:param name="HEADER_KEY" select="'Trismegistos'"/>
+  <xsl:param name="TABLE_NAME" select="'data'"/>
+  <xsl:param name="IMAGE_KEY" select="'url'"/>
+  <xsl:param name="HEADER_KEY" select="'TM'"/>
   <xsl:param name="HEADER_LINE" select="1"/>
   <xsl:param name="DATA_LINE" select="2"/>
 
@@ -69,6 +70,7 @@
   <xsl:template name="xwalk">
     <xsl:param name="id"/>
     <xsl:param name="data"/>
+    <xsl:param name="mode"/>
     <!-- HGV -->
     <xsl:variable name="hgv" select="$IDNOS//tei:item[@tm=$id][@hgv]/@hgv"/>
     <xsl:for-each select="$hgv">
