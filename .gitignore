@@ -3,4 +3,6 @@
 /xslt/0*
 /xslt/*.csv
 /xslt/*.xml
-
+/*.csv
+/*.txt
+.DS_Store
