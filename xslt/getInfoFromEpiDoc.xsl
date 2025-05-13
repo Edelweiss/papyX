@@ -279,13 +279,13 @@
 <!-- placeName[@type='ancient'][@subtype='region'] -->
     <xsl:template name="COLLECTION">
       <list>
-          <xsl:for-each-group select="collection(concat('../idp.data/papyri/master/HGV_meta_EpiDoc', '?select=*.xml;recurse=yes'))//tei:msIdentifier/tei:collection" group-by="string(.)">
-              <xsl:variable name="info" select="current-grouping-key()"/>
+          <xsl:for-each select="collection(concat('../idp.data/papyri/xwalk/HGV_meta_EpiDoc', '?select=*.xml;recurse=yes'))[count(.//tei:msIdentifier/tei:collection) &gt; 1]">
+            <xsl:variable name="info" select="count(.//tei:msIdentifier/tei:collection)"/>
               <item>
                 <info><xsl:value-of select="$info"/></info>
               </item>
-              <xsl:message select="concat('', $info)"/>
-          </xsl:for-each-group>
+            <xsl:message select="concat(.//tei:idno[@type='filename'], ' - ', $info, ' - ', string-join(.//tei:msIdentifier/tei:collection, '|'))"/>
+          </xsl:for-each>
         </list>
     </xsl:template>
 

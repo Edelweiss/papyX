@@ -30,7 +30,7 @@
   <xsl:param name="IMAGE_KEY" select="'url'"/>
   <xsl:param name="HEADER_KEY" select="'TM'"/>
   <xsl:param name="HEADER_LINE" select="1"/>
-  <xsl:param name="DATA_LINE" select="2"/>
+  <xsl:param name="DATA_LINE" select="3"/>
 
   <xsl:template name="ADD_COLLECTION">
     <xsl:variable name="fods">
@@ -72,7 +72,7 @@
     <xsl:param name="data"/>
     <xsl:param name="mode"/>
     <!-- HGV -->
-    <xsl:variable name="hgv" select="$IDNOS//tei:item[@tm=$id][@hgv]/@hgv"/>
+    <!--xsl:variable name="hgv" select="$IDNOS//tei:item[@tm=$id][@hgv]/@hgv"/>
     <xsl:for-each select="$hgv">
       <xsl:variable name="in" select="concat('../idp.data/papyri/master/', papy:hgvFilePath(.))"/>
       <xsl:variable name="out" select="replace($in, 'master', 'xwalk')"/>
@@ -82,7 +82,7 @@
         </xsl:apply-templates>
       </xsl:result-document>
       <xsl:message select="concat($id, '/', .)"/>
-    </xsl:for-each>
+    </xsl:for-each-->
     <!-- DCLP -->
     <xsl:variable name="dclp" select="$IDNOS//tei:item[@tm=$id][@dclp]/@dclp"/>
     <xsl:for-each select="$dclp">
@@ -99,60 +99,6 @@
 
   <!-- HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV HGV -->
 
-  <!--div type="figure">
-    <p>
-      <figure>
-        <graphic url="http://www.ville-ge.ch/musinfo/imageZoom/?iip=bgeiip/papyrus/pgen181a-1ri.ptif"/>
-      </figure>
-      <figure>
-        <graphic url="https://archives.bge-geneve.ch/ark:/17786/vtae3bfef9dc023d072"/>
-      </figure>
-    </p>
-  </div-->
-
-  <xsl:template match="tei:body[not(tei:div[@type='figure'])]" mode="copy">
-    <xsl:param name="data"/>
-    <xsl:copy>
-      <xsl:for-each select="@*|node()">
-        <xsl:apply-templates select="." mode="copy"/>
-      </xsl:for-each>
-      <div type="figure">
-        <p>
-          <xsl:call-template name="hgvImage">
-            <xsl:with-param name="data" select="$data"/>
-          </xsl:call-template>
-        </p>
-      </div>
-    </xsl:copy>
-  </xsl:template>
-
-  <xsl:template match="tei:div[@type='figure']/tei:p" mode="copy">
-    <xsl:param name="data"/>
-    <xsl:copy>
-      <xsl:for-each select="tei:figure">
-        <xsl:message select="$data//tei:cell[@name=$IMAGE_KEY]/string(.)"></xsl:message>
-        <xsl:if test="not(tei:graphic/@url = $data//tei:cell[@name=$IMAGE_KEY]/string(.))">
-          <xsl:apply-templates select="." mode="copy"/>
-        </xsl:if>
-      </xsl:for-each>
-      <xsl:call-template name="hgvImage">
-        <xsl:with-param name="data" select="$data"/>
-      </xsl:call-template>
-    </xsl:copy>
-  </xsl:template>
-
-  <xsl:template name="hgvImage">
-    <xsl:param name="data"/>
-    <xsl:for-each select="$data">
-      <xsl:variable name="row" select="."/>
-      <xsl:variable name="firstLink" select="$row//tei:cell[@name=$IMAGE_KEY]"/>
-      <xsl:for-each select="($firstLink, $firstLink/following-sibling::tei:cell[matches(., '^https?://.+\..+$')])">
-        <figure>
-          <graphic url="{.}"/>
-        </figure>
-      </xsl:for-each>
-    </xsl:for-each>
-  </xsl:template>
 
   <!--msIdentifier>
     <placeName>
@@ -162,13 +108,13 @@
     <idno type="invNo">Pap. Select Box 201</idno>
   </msIdentifier-->
 
-  <!--xsl:template match="tei:msIdentifier" mode="copy">
+  <xsl:template match="tei:msIdentifier" mode="copy">
     <xsl:param name="data"/>
     <xsl:copy>
-      <xsl:for-each select="$data//tei:cell[@name='Inventory Nr']">
-        <xsl:variable name="settlement" select="'Qift'"/>
-        <xsl:variable name="collection" select="'Archaeological storeroom'"/>
-        <xsl:variable name="inventoryNumber" select="normalize-space(replace(., 'Qift,? ?Archaeological storeroom,? ?', ''))"/>
+      <xsl:for-each select="$data//tei:cell[@name='inv']">
+        <xsl:variable name="settlement" select="'Toronto'"/>
+        <xsl:variable name="collection" select="'Royal Ontario Museum'"/>
+        <xsl:variable name="inventoryNumber" select="normalize-space(.)"/>
         <xsl:message select="$inventoryNumber"/>
         <placeName>
           <settlement><xsl:value-of select="$settlement"/></settlement>
@@ -177,65 +123,31 @@
         <idno type="invNo"><xsl:value-of select="$inventoryNumber"/></idno>
       </xsl:for-each>
     </xsl:copy>
-  </xsl:template-->
+  </xsl:template>
 
   <!-- DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP DCLP -->
-
-  <!--div type="bibliography" subtype="illustrations">
-      <listBibl>
-         <bibl type="printed">P.Gen. 3, pl.5</bibl>
-         <bibl type="printed">Proceedings 20th Congress, pl.28</bibl>
-         <bibl type="online">
-            <ptr target="http://www.ville-ge.ch/fcgi-bin/fcgi-axn?launchpad&amp;/home/minfo/bge/papyrus/pgen432-vi.axs&amp;550&amp;550"/>
-         </bibl>
-         <bibl type="online">
-            <ptr target="https://archives.bge-geneve.ch/ark:/17786/vtab44b3b169c5ea7a5"/>
-         </bibl>
-      </listBibl>
-   </div-->
-
-  <xsl:template match="tei:body[not(tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl)]" mode="copy_dclp">
+  
+  <xsl:template match="tei:msIdentifier" mode="copy_dclp">
     <xsl:param name="data"/>
     <xsl:copy>
-      <xsl:apply-templates select="@*|node()" mode="copy_dclp"/>
-      <div type="bibliography" subtype="illustrations">
-        <listBibl>
-          <xsl:call-template name="dclpImage">
-            <xsl:with-param name="data" select="$data"/>
-          </xsl:call-template>
-        </listBibl>
-      </div>
+      <xsl:variable name="invNo" select="string-join($data//tei:cell[@name='inv'], '; ')"/>
+      <xsl:message select="$invNo"/>
+      <idno type="invNo">Toronto, Royal Ontario Museum <xsl:value-of select="$invNo"/></idno>
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="tei:div[@type='bibliography'][@subtype='illustrations']/tei:listBibl" mode="copy_dclp">
+  <xsl:template match="tei:msDesc[not(tei:msIdentifier)]" mode="copy_dclp">
     <xsl:param name="data"/>
     <xsl:copy>
-      <xsl:for-each select="tei:bibl[@type='printed']">
-        <xsl:apply-templates select="." mode="copy_dclp"/>
-      </xsl:for-each>
-      <xsl:for-each select="tei:bibl[@type='online']">
-        <xsl:if test="not(tei:ptr/@target = $data//tei:cell[@name=$IMAGE_KEY]/string(.))">
-          <xsl:apply-templates select="." mode="copy_dclp"/>
-        </xsl:if>
-      </xsl:for-each>
-      <xsl:call-template name="dclpImage">
+      <msIdentifier>
+        <xsl:variable name="invNo" select="string-join($data//tei:cell[@name='inv'], '; ')"/>
+        <xsl:message select="concat($invNo, ' - no tei:msIdentifier')"/>
+        <idno type="invNo">Toronto, Royal Ontario Museum <xsl:value-of select="$invNo"/></idno>
+      </msIdentifier>
+      <xsl:apply-templates select="./node()" mode="copy_dclp">
         <xsl:with-param name="data" select="$data"/>
-      </xsl:call-template>
+      </xsl:apply-templates>
     </xsl:copy>
-  </xsl:template>
-
-  <xsl:template name="dclpImage">
-    <xsl:param name="data"/>
-    <xsl:for-each select="$data">
-      <xsl:variable name="row" select="."/>
-      <xsl:variable name="firstLink" select="$row//tei:cell[@name=$IMAGE_KEY]"/>
-      <xsl:for-each select="($firstLink, $firstLink/following-sibling::tei:cell[matches(., '^https?://.+\..+$')])">
-        <bibl type="online">
-          <ptr target="{.}"/>
-        </bibl>
-      </xsl:for-each>
-    </xsl:for-each>
   </xsl:template>
 
   <xsl:template match="@*|node()" mode="copy_dclp">
